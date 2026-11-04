@@ -72,25 +72,30 @@ Treba ti nalog na GitHub-u i besplatan nalog na [supabase.com](https://supabase.
 
 3. **Prijava** (Supabase → Authentication):
    - *URL Configuration*: Site URL i Redirect URLs na adresu sajta, npr.
-     `https://<korisnik>.github.io/co-parenting-app/` i
-     `https://<korisnik>.github.io/co-parenting-app/**`.
+     `https://<ime>.pages.dev` i `https://<ime>.pages.dev/**`.
    - *Providers → Email*: uključena potvrda mejla; minimalna lozinka 10
      znakova, slova i brojevi (kao lokalno u `supabase/config.toml`).
    - *Emails → SMTP*: podesi svoj SMTP (npr. Gmail sa lozinkom za aplikacije
      ili Resend). Ugrađeno slanje šalje mejlove samo članovima tvog Supabase
      tima, pa drugom roditelju mejl za potvrdu ne bi stigao.
    - MFA (TOTP) je na Supabase-u uključen podrazumevano.
-4. **Sajt na GitHub Pages** (workflow je u `.github/workflows/pages.yml`):
-   - *Settings → Pages → Source*: **GitHub Actions**.
-   - *Settings → Secrets and variables → Actions → Variables*:
-     `PUBLIC_SUPABASE_URL` (npr. `https://<ref>.supabase.co`) i
-     `PUBLIC_SUPABASE_KEY` (Project Settings → API Keys → publishable key).
-   - Svaki push na `main` objavi novu verziju na
-     `https://<korisnik>.github.io/<ime-repoa>/`. Bez ove dve promenljive sajt
-     je samo demo.
+4. **Sajt na Cloudflare Pages** (preporuka; aplikacija dobija svoju adresu
+   `<ime>.pages.dev`, odvojenu od tvojih drugih sajtova):
+   - *Workers & Pages → Create application → Pages → Import an existing Git
+     repository*, izaberi svoj repo.
+   - Framework preset **Astro**, build `npm run build`, izlaz `dist`
+     (Node verzija je u `.node-version`).
+   - *Environment variables*: `PUBLIC_SUPABASE_URL` (npr.
+     `https://<ref>.supabase.co`) i `PUBLIC_SUPABASE_KEY` (Project Settings →
+     API Keys → publishable key). Bez njih je sajt samo demo.
+   - Svaki push na `main` objavi novu verziju.
 
-   Može i Cloudflare Pages (radi i sa privatnim repoom): build `npm run build`,
-   izlaz `dist`, iste dve promenljive.
+   Ili **GitHub Pages** (workflow je u `.github/workflows/pages.yml`, isključen
+   dok ga ne uključiš): *Settings → Pages → Source: GitHub Actions*, pa pod
+   *Settings → Secrets and variables → Actions → Variables* `GITHUB_PAGES` =
+   `da` i iste dve Supabase promenljive. Adresa je
+   `https://<korisnik>.github.io/<ime-repoa>/`; na njoj su i tvoji ostali
+   GitHub Pages sajtovi, pa dele prijavu sačuvanu u pregledaču.
 5. **Ko sme da otvori prostor**: dok je tabela `dozvoljeni_osnivac` prazna,
    svako ko napravi nalog može da otvori svoj porodični prostor. Ako hoćeš da
    tvoja kopija bude samo za tvoju porodicu, upiši svoj mejl (Supabase → Table

@@ -1,11 +1,12 @@
-# Builds the app and publishes it on GitHub Pages at
-# https://<owner>.github.io/<repo>/ on every push to main.
-#
-# One-time setup: Settings → Pages → Source: GitHub Actions, and under
-# Settings → Secrets and variables → Actions → Variables:
-#   PUBLIC_SUPABASE_URL  e.g. https://<ref>.supabase.co
-#   PUBLIC_SUPABASE_KEY  the project's publishable key (made to be public)
-# Without them the published site is the demo only.
+# Optional: publishes the app on GitHub Pages at
+# https://<owner>.github.io/<repo>/ on every push to main. Off by default
+# (the author's copy is on Cloudflare Pages); to use it in your fork:
+#   Settings → Pages → Source: GitHub Actions, and under
+#   Settings → Secrets and variables → Actions → Variables:
+#     GITHUB_PAGES         da
+#     PUBLIC_SUPABASE_URL  e.g. https://<ref>.supabase.co
+#     PUBLIC_SUPABASE_KEY  the project's publishable key (made to be public)
+# Without the two Supabase values the published site is the demo only.
 name: Objavi na GitHub Pages
 
 on:
@@ -24,6 +25,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ vars.GITHUB_PAGES == 'da' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -34,6 +36,7 @@ jobs:
           PUBLIC_SUPABASE_KEY: ${{ vars.PUBLIC_SUPABASE_KEY }}
 
   deploy:
+    if: ${{ vars.GITHUB_PAGES == 'da' }}
     needs: build
     runs-on: ubuntu-latest
     environment:

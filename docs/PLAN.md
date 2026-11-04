@@ -284,10 +284,13 @@ Pregledač razgovara sa bazom direktno preko `supabase-js`, pa nema posebnog ser
 
 Sva logika je u SQL migracijama u repou (`supabase/migrations`).
 
-**Hosting: GitHub Pages** (2026-11-03), adresa
-`https://manse404.github.io/co-parenting-app/`. Cloudflare ostaje rezerva.
-Workflow `.github/workflows/pages.yml` gradi sa `BASE_PATH=/<ime-repoa>`, pa
-radi i za svaki fork.
+**Hosting: Cloudflare Pages** (2026-11-04; ranije GitHub Pages), adresa
+`<ime>.pages.dev`. Razlog: na `manse404.github.io` svi GitHub Pages sajtovi
+vlasnika dele isto poreklo (origin), pa bi svaki od njih mogao da pročita
+prijavu sačuvanu u pregledaču; aplikacija sa zdravstvenim podacima i
+dokumentima dobija svoju adresu. Build: `npm run build`, izlaz `dist`, Node iz
+`.node-version`. GitHub Pages workflow (`.github/workflows/pages.yml`) ostaje
+za forkove i uključuje se promenljivom `GITHUB_PAGES=da`.
 
 **Otvoren kod, privatna kopija** (2026-11-04): repo je javan pod MIT
 licencom, da svako može da podigne svoju kopiju (uputstvo u README). Kopija
