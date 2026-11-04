@@ -104,6 +104,18 @@ describe('Excel .xlsx', () => {
     expect(r.tabela[0]).toEqual(['Srpski & jezik', '', 'Priroda', '', '']);
   });
 
+  it('ćelija daleko desno se preskače, a ne puni memoriju', async () => {
+    const xlsx = napraviXlsx({
+      'xl/worksheets/sheet1.xml': '<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>Čas</t></is></c><c r="ZZZZZZZZ1"><v>1</v></c></row></sheetData></worksheet>',
+    });
+    expect(await citajXlsx(xlsx)).toEqual([['Čas']]);
+  });
+
+  it('fajl koji se raspakuje u ogroman sadržaj se odbija', async () => {
+    const xlsx = napraviXlsx({ 'xl/worksheets/sheet1.xml': '<worksheet>' + ' '.repeat(11 * 1024 * 1024) + '</worksheet>' });
+    await expect(citajXlsx(xlsx)).rejects.toThrow(/neobično velik/);
+  });
+
   it('fajl koji nije zip', async () => {
     await expect(citajXlsx(new Uint8Array([1, 2, 3]))).rejects.toThrow(/xlsx/);
   });

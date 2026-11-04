@@ -149,7 +149,9 @@ export function napraviDokumenteUBazi(): DokumentiIzvor {
       const { error: e1 } = await kanta().upload(putanja, new Blob([fajl], { type: tip }), {
         contentType: tip,
         upsert: false,
-        cacheControl: '3600',
+        // Not kept in the browser cache: on a shared device the next person
+        // should not be able to reopen a medical PDF from it.
+        cacheControl: '0',
       });
       if (e1) throw greska(e1);
       await rpc('dodaj_dokument', { p_id: id, p_putanja: putanja, ...args });

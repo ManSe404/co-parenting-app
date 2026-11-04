@@ -42,10 +42,12 @@ const linkovi = [
          sees app screens flash by on the way to the sign-in page. -->
     <script is:inline define:vars={{ imaBazu }}>
       try {
+        // Demo only for this tab (see jeDemo in src/lib/supabase.ts).
+        localStorage.removeItem('coparenting.demo');
         const q = new URLSearchParams(location.search).get('demo');
-        if (q === '1') localStorage.setItem('coparenting.demo', '1');
-        if (q === '0') localStorage.removeItem('coparenting.demo');
-        const demo = !imaBazu || localStorage.getItem('coparenting.demo') === '1';
+        if (q === '1') sessionStorage.setItem('coparenting.demo', '1');
+        if (q === '0') sessionStorage.removeItem('coparenting.demo');
+        const demo = !imaBazu || sessionStorage.getItem('coparenting.demo') === '1';
         document.documentElement.dataset.rezim = demo ? 'demo' : 'baza';
       } catch {
         document.documentElement.dataset.rezim = imaBazu ? 'baza' : 'demo';

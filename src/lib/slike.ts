@@ -1,6 +1,8 @@
-// Getting a picked file ready for upload. Phone photos are shrunk (they are
-// often 5–12 MB); iPhone HEIC photos become JPEG where the browser can read
-// them; PDFs and small pictures go as they are.
+// Getting a picked file ready for upload. Photos are always redrawn: that
+// shrinks phone photos (often 5–12 MB) and drops the location, time and
+// device a phone writes into them, which the other parent should not get.
+// iPhone HEIC photos become JPEG where the browser can read them; PDFs and
+// small PNGs (screenshots, scans) go as they are.
 
 import { GreskaDokumenta, type TipFajla, proveriVelicinu, vrstaFajla } from './dokumenti';
 
@@ -28,7 +30,7 @@ export async function pripremi(f: File): Promise<{ fajl: Blob; tip: TipFajla }> 
   }
 
   const najduza = Math.max(slika.width, slika.height);
-  if (vrsta !== 'heic' && najduza <= NAJDUZA_IVICA && f.size <= DOVOLJNO_MALA) {
+  if (vrsta === 'image/png' && najduza <= NAJDUZA_IVICA && f.size <= DOVOLJNO_MALA) {
     slika.close();
     return { fajl: f, tip: vrsta };
   }

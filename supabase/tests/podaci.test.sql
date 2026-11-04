@@ -66,7 +66,7 @@ select throws_ok($$select public.odgovori_na_stavku((select s from p), 'još ne�
 select lives_ok($$select public.ponovo_otvori_stavku((select s from p), 'Promenio se datum')$$, 'ponovno otvaranje sa razlogom');
 -- (In this test everything is one transaction, so the times are equal: compare as a bag.)
 select bag_eq($$select vrsta from public.unos$$,
-              $$select unnest(array['odgovor', 'odgovor', 'predlog_zatvaranja', 'zatvoreno', 'ponovo_otvoreno'])$$,
+              $$select unnest(array['odgovor', 'odgovor', 'izmenjeno', 'predlog_zatvaranja', 'zatvoreno', 'ponovo_otvoreno'])$$,
               'tok stavke beleži svaki korak');
 select is((select count(distinct autor)::int from public.unos), 2, 'svaki unos ima pravog autora');
 

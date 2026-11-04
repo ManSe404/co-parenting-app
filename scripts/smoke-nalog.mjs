@@ -181,6 +181,7 @@ ok('registracija sa potvrdom mejla vodi na dobrodošlicu');
 await tata.klikni('Tata');
 await tata.klikni('Napravi prostor');
 await tata.cekajTekst('Pozovi mamu');
+await tata.upisi('.poziv input[type=email]', MAMA);
 await tata.klikni('Napravi link za mamu');
 await tata.cekajTekst('Link važi 7 dana');
 const link = await tata.ev(`document.querySelector('input[aria-label="Link za poziv"]').value`);

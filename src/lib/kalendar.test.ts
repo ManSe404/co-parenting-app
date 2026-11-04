@@ -133,6 +133,10 @@ describe('zahtevi: niko ne menja kalendar sam', () => {
 
   it('preklapanje u istom sloju se odbija, jednokratna promena sme preko redovnog', () => {
     expect(() => zahtev({ boravci: [predlog({ vrsta: 'redovno' })] })).toThrow(/Preklapa/);
+    // One request is one layer: the title the other parent sees must be true.
+    expect(() =>
+      zahtev({ boravci: [predlog({ od: '2026-12-01T10:00', do: '2026-12-02T10:00' }), predlog({ vrsta: 'redovno', od: '2026-12-03T10:00', do: '2026-12-04T10:00' })] }),
+    ).toThrow(/posebno/);
     expect(() => zahtev()).not.toThrow();
   });
 

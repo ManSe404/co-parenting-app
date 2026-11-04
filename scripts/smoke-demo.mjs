@@ -74,8 +74,10 @@ await cdp('Runtime.enable');
 const greske = [];
 ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.method === 'Runtime.exceptionThrown') greske.push(m.params.exceptionDetails.text); });
 
-await idi(`${BASE}/`);
-await ev(`localStorage.clear(); sessionStorage.clear(); localStorage.setItem('coparenting.demo', '1'); true`);
+// Start clean on a page that does not seed the demo documents, so the seed
+// (documents plus mama's deletion proposal) is written once, after the reset.
+await idi(`${BASE}/nova/`);
+await ev(`localStorage.clear(); sessionStorage.clear(); indexedDB.deleteDatabase('coparenting-demo-dokumenti'); sessionStorage.setItem('coparenting.demo', '1'); true`);
 await kao('tata');
 
 // 1. Tata postavlja novo pitanje

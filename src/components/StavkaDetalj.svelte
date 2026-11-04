@@ -83,6 +83,7 @@
     odbijeno_zatvaranje: ['ne slažeš se sa zatvaranjem', 'ne slaže se sa zatvaranjem'],
     zatvoreno: ['potvrđuješ zatvaranje', 'potvrđuje zatvaranje'],
     ponovo_otvoreno: ['ponovo otvaraš', 'ponovo otvara'],
+    izmenjeno: ['menjaš stavku', 'menja stavku'],
   };
 
   const FORMA: Record<Exclude<Rezim, 'izmena'>, { label: string; placeholder: string; dugme: string }> = {
@@ -197,7 +198,7 @@
             </div>
           </form>
         {/if}
-        {#if rezim === 'odgovor' && s.stanje !== 'zatvoreno'}
+        {#if rezim === 'odgovor' && s.stanje !== 'zatvoreno' && !s.zatvaranjePredlozio}
           <button class="izmeni mono" onclick={() => prebaci('izmena')}>Izmeni naslov, oblast, oznake ili datum</button>
         {/if}
       </section>

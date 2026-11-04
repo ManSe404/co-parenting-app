@@ -95,11 +95,30 @@ function u32(b: Uint8Array, i: number) {
   return (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16) | (b[i + 3] << 24)) >>> 0;
 }
 
+// A timetable is a few KB; these limits only stop a broken or hostile file
+// from freezing the tab (a "zip bomb", or a cell reference far to the right).
+const NAJVISE_FAJL = 2 * 1024 * 1024;
+const NAJVISE_RASPAKOVANO = 10 * 1024 * 1024;
+const NAJVISE_KOLONA = 60;
+const NAJVISE_REDOVA = 500;
+
 async function izvadi(metod: number, podaci: Uint8Array): Promise<string> {
   if (metod === 0) return new TextDecoder().decode(podaci);
   if (metod !== 8) throw new Error('Nepodržana kompresija u fajlu.');
-  const tok = new Blob([podaci as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-  return new TextDecoder().decode(await new Response(tok).arrayBuffer());
+  const citac = new Blob([podaci as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+  const delovi: Uint8Array[] = [];
+  let ukupno = 0;
+  for (;;) {
+    const { done, value } = await citac.read();
+    if (done) break;
+    ukupno += value.length;
+    if (ukupno > NAJVISE_RASPAKOVANO) {
+      await citac.cancel();
+      throw new Error('Fajl je neobično velik kad se raspakuje. Sačuvaj raspored ponovo ili kao CSV.');
+    }
+    delovi.push(value);
+  }
+  return new TextDecoder().decode(await new Blob(delovi as BlobPart[]).arrayBuffer());
 }
 
 async function zip(b: Uint8Array): Promise<Map<string, () => Promise<string>>> {
@@ -162,6 +181,7 @@ export async function citajXlsx(podaci: ArrayBuffer | Uint8Array): Promise<strin
   const list = await fajlovi.get(listovi[0])!();
   const redovi: string[][] = [];
   for (const r of list.match(/<row[^>]*>[\s\S]*?<\/row>/g) ?? []) {
+    if (redovi.length >= NAJVISE_REDOVA) break;
     const red: string[] = [];
     for (const c of r.match(/<c [^>]*?(?:\/>|>[\s\S]*?<\/c>)/g) ?? []) {
       const ref = /r="([A-Z]+\d+)"/.exec(c)?.[1];
@@ -172,6 +192,7 @@ export async function citajXlsx(podaci: ArrayBuffer | Uint8Array): Promise<strin
       else if (tip === 'inlineStr') tekst = xmlTekst((/<t[^>]*>([\s\S]*?)<\/t>/.exec(c)?.[1] ?? ''));
       else if (v !== undefined) tekst = xmlTekst(v);
       const i = ref ? kolona(ref) : red.length;
+      if (i < 0 || i >= NAJVISE_KOLONA) continue;
       while (red.length < i) red.push('');
       red[i] = tekst.trim();
     }
@@ -246,6 +267,7 @@ export function uRaspored(ulaz: string[][]): Pick<UlazRasporeda, 'casovi' | 'tab
 export async function uveziFajl(fajl: File): Promise<Pick<UlazRasporeda, 'casovi' | 'tabela'>> {
   const ime = fajl.name.toLowerCase();
   if (ime.endsWith('.xls')) throw new Error('Stari .xls format nije podržan. U Excelu: Sačuvaj kao → .xlsx ili CSV.');
+  if (fajl.size > NAJVISE_FAJL) throw new Error('Fajl je prevelik za raspored časova (najviše 2 MB).');
   const redovi = ime.endsWith('.xlsx') ? await citajXlsx(await fajl.arrayBuffer()) : parsirajCsv(await fajl.text());
   return uRaspored(redovi);
 }

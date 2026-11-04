@@ -23,20 +23,25 @@
   onMount(async () => {
     // Coming back from Google or from the confirmation e-mail: the session is
     // picked up from the URL; then go on.
-    const { data } = await supabase().auth.getSession();
-    if (data.session && rezim !== 'nova-lozinka') {
-      await posleUlaska(dalje);
-      return;
+    try {
+      const { data } = await supabase().auth.getSession();
+      if (data.session && rezim !== 'nova-lozinka') {
+        await posleUlaska(dalje);
+        return;
+      }
+    } catch (err) {
+      greska = poruka(err);
     }
     // A link from an e-mail that was already used or has expired comes back
-    // with the error in the address (#error_code=otp_expired…): say so.
+    // with the error in the address (#error_code=otp_expired…): say so, in
+    // our own words only (the address can be crafted by anyone).
     const h = new URLSearchParams(location.hash.slice(1));
     const kod = h.get('error_code') ?? q.get('error_code');
     if (kod) {
       greska =
         kod === 'otp_expired'
           ? 'Link iz mejla je istekao ili je već iskorišćen. Ako si nalog već potvrdio, samo se prijavi; inače napravi nalog ponovo i stići će nov link.'
-          : `Link iz mejla nije prošao (${h.get('error_description') ?? q.get('error_description') ?? kod}). Probaj ponovo.`;
+          : 'Link iz mejla nije prošao. Probaj ponovo ili zatraži nov link.';
       history.replaceState(null, '', location.pathname + location.search);
     }
     spreman = true;

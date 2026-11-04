@@ -1,12 +1,14 @@
 # Optional: publishes the app on GitHub Pages at
-# https://<owner>.github.io/<repo>/ on every push to main. Off by default
-# (the author's copy is on Cloudflare Pages); to use it in your fork:
+# https://<owner>.github.io/<repo>/ on every push to main. Off by default;
+# to use it in your fork:
 #   Settings → Pages → Source: GitHub Actions, and under
 #   Settings → Secrets and variables → Actions → Variables:
 #     OBJAVI_PAGES         da
 #     PUBLIC_SUPABASE_URL  e.g. https://<ref>.supabase.co
 #     PUBLIC_SUPABASE_KEY  the project's publishable key (made to be public)
 # Without the two Supabase values the published site is the demo only.
+# Actions are pinned to commits (the tag is in the comment); only the deploy
+# job may write to Pages.
 name: Objavi na GitHub Pages
 
 on:
@@ -16,8 +18,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -28,8 +28,8 @@ jobs:
     if: ${{ vars.OBJAVI_PAGES == 'da' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: withastro/action@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: withastro/action@a8b97df764791eb61fbf3338ef713b0e61ae05c5 # v6
         env:
           BASE_PATH: /${{ github.event.repository.name }}
           # The author's copy talks to its own Supabase project (both values are
@@ -42,9 +42,12 @@ jobs:
     if: ${{ vars.OBJAVI_PAGES == 'da' }}
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

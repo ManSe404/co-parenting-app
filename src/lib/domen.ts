@@ -2,7 +2,8 @@
 // between states. No I/O here, so every rule is unit-tested, and the database
 // enforces the same transitions on its side once Supabase is wired in.
 
-import type { NovaStavkaUlaz, Podaci, Stavka, Unos, VrstaUnosa } from './tipovi';
+import { OBLASTI } from './osnova';
+import type { IzmenaStavke, NovaStavkaUlaz, Podaci, Stavka, Unos, VrstaUnosa } from './tipovi';
 
 export const DANA_ZA_HITNO = 3;
 export const DANA_PREDSTOJECE = 14;
@@ -119,6 +120,7 @@ export const OPIS_UNOSA: Record<VrstaUnosa, string> = {
   odbijeno_zatvaranje: 'odbijeno zatvaranje',
   zatvoreno: 'potvrđeno zatvaranje',
   ponovo_otvoreno: 'ponovo otvoreno',
+  izmenjeno: 'izmena stavke',
 };
 
 export function napraviPregled(p: Podaci, sada: Date): Pregled {
@@ -213,6 +215,43 @@ export function proveriNovu(ulaz: NovaStavkaUlaz): NovaStavkaUlaz {
     opis: ulaz.opis.trim(),
     datum: ulaz.datum || null,
   };
+}
+
+function rokTekst(d: string | null): string {
+  return d ? `${Number(d.slice(8, 10))}. ${Number(d.slice(5, 7))}. ${d.slice(0, 4)}.` : 'bez roka';
+}
+
+function nazivOblasti(k: string): string {
+  return OBLASTI.find((o) => o.kljuc === k)?.naziv ?? k;
+}
+
+/**
+ * An edit of an open item. What changed goes into the item's thread, in the
+ * same words as izmeni_stavku in the database; a closed item, or one whose
+ * closing waits for the other parent, is not edited.
+ */
+export function izmeni(s: Stavka, autor: string, izmena: IzmenaStavke, sada: string): Promena {
+  if (s.stanje === 'zatvoreno') throw new GreskaPravila('Rešena stavka se ne menja. Ako treba, ponovo je otvori.');
+  if (s.zatvaranjePredlozio) throw new GreskaPravila('Zatvaranje čeka potvrdu. Povuci ili odbij predlog, pa izmeni.');
+  const n = proveriNovu({
+    naslov: izmena.naslov ?? s.naslov,
+    opis: izmena.opis ?? s.opis,
+    oblast: izmena.oblast ?? s.oblast,
+    vazno: izmena.vazno ?? s.vazno,
+    hitno: izmena.hitno ?? s.hitno,
+    datum: 'datum' in izmena ? (izmena.datum ?? null) : s.datum,
+  });
+  const promene: string[] = [];
+  if (n.naslov !== s.naslov) promene.push(`Naslov: „${s.naslov}“ → „${n.naslov}“`);
+  if (n.oblast !== s.oblast) promene.push(`Oblast: ${nazivOblasti(s.oblast)} → ${nazivOblasti(n.oblast)}`);
+  if (n.vazno !== s.vazno) promene.push(n.vazno ? 'Označeno kao važno' : 'Više nije označeno kao važno');
+  if (n.hitno !== s.hitno) promene.push(n.hitno ? 'Označeno kao hitno' : 'Više nije označeno kao hitno');
+  if (n.datum !== s.datum) promene.push(`Rok: ${rokTekst(s.datum)} → ${rokTekst(n.datum)}`);
+  if (n.opis !== s.opis) {
+    promene.push(s.opis === '' ? 'Dodat opis' : `Opis izmenjen; ranije: „${s.opis.length > 1500 ? `${s.opis.slice(0, 1500)}…` : s.opis}“`);
+  }
+  if (!promene.length) return { stavka: s, unos: null };
+  return { stavka: { ...s, ...n, izmenjeno: sada }, unos: unos(s, autor, 'izmenjeno', promene.join('\n'), sada) };
 }
 
 /** A reply from the other parent moves an unanswered item to open. */

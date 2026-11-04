@@ -13,6 +13,7 @@ import {
 } from './dogadjaji';
 import type { Boravak, ZahtevKalendara } from './kalendar';
 import { odbijZahtev, pomeriPrelazak } from './kalendar';
+import { ostaleRazlike } from './kalendar-opis';
 
 const T = '2026-11-04T10:00:00.000Z';
 const RODITELJI = ['tata', 'mama'];
@@ -114,6 +115,32 @@ describe('zahtevi za aktivnosti: niko sam', () => {
     const brisanje: ZahtevKalendara = { id: 'z2', ...napraviZahtevDogadjaja({ vrsta: 'obrisi', dogadjajId: 'f', dogadjaj: null, poruka: '' }, 'tata', RODITELJI, postoji, T) };
     expect(prihvatiZahtevDogadjaja(brisanje, 'mama', postoji, T, noviId).dogadjaji).toEqual([]);
     expect(odbijZahtev(brisanje, 'mama', 'Trening i dalje traje', T).stanje).toBe('odbijen');
+  });
+
+  it('preskočeni dani ne idu kroz predlog, a izmena serije ih čuva', () => {
+    const nedeljno = { tip: 'nedeljno' as const, svakih: 1 as const, dani: [1], do: null };
+    const serija = d('s', { ponavljanje: nedeljno, izuzeti: ['2026-11-10'] });
+    const z: ZahtevKalendara = {
+      id: 'z3',
+      ...napraviZahtevDogadjaja(
+        { vrsta: 'izmeni', dogadjajId: 's', dogadjaj: { ...predlog({ ponavljanje: nedeljno, od: '17:30', do: '18:30' }), izuzeti: [] }, poruka: '' },
+        'tata',
+        RODITELJI,
+        [serija],
+        T,
+      ),
+    };
+    expect(z.dogadjaj).not.toHaveProperty('izuzeti');
+    expect(prihvatiZahtevDogadjaja(z, 'mama', [serija], T, noviId).dogadjaji[0]).toMatchObject({ id: 's', od: '17:30', izuzeti: ['2026-11-10'] });
+  });
+
+  it('drugi roditelj vidi i vrstu, mesto i napomenu', () => {
+    expect(ostaleRazlike(predlog(), predlog({ vrsta: 'ostalo', mesto: 'Bazen', napomena: 'Ponesi kapu' }))).toEqual([
+      'vrsta: Trening → Ostalo',
+      'mesto: bez mesta → „Bazen“',
+      'napomena: „Ponesi kapu“',
+    ]);
+    expect(ostaleRazlike(predlog(), predlog())).toEqual([]);
   });
 
   it('neispravan unos', () => {

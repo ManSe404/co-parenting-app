@@ -14,13 +14,17 @@ export function imaBazu(): boolean {
   return Boolean(URL_BAZE && KLJUC);
 }
 
+// The demo lives only in this tab (sessionStorage): it never sticks to the
+// browser, so a parent who tried it and then signs in sees real data. The
+// same decision is made before paint in layouts/App.astro.
 export function jeDemo(): boolean {
   if (!imaBazu()) return true;
   try {
+    localStorage.removeItem(KLJUC_DEMO);
     const q = new URLSearchParams(location.search).get('demo');
-    if (q === '1') localStorage.setItem(KLJUC_DEMO, '1');
-    if (q === '0') localStorage.removeItem(KLJUC_DEMO);
-    return localStorage.getItem(KLJUC_DEMO) === '1';
+    if (q === '1') sessionStorage.setItem(KLJUC_DEMO, '1');
+    if (q === '0') sessionStorage.removeItem(KLJUC_DEMO);
+    return sessionStorage.getItem(KLJUC_DEMO) === '1';
   } catch {
     return false;
   }
@@ -28,6 +32,7 @@ export function jeDemo(): boolean {
 
 export function izadjiIzDemoa(): void {
   try {
+    sessionStorage.removeItem(KLJUC_DEMO);
     localStorage.removeItem(KLJUC_DEMO);
   } catch {
     /* ignore */

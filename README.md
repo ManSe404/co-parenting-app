@@ -37,7 +37,8 @@ probati sam.
 - **Profil roditelja**: telefon, adresa za primopredaju, mejl, napomena.
 - **Nalozi**: mejl i lozinka sa potvrdom mejla, dvostepena prijava (MFA,
   kodovi iz aplikacije), opciono Google. Prvi roditelj otvara porodični
-  prostor i šalje drugom link za poziv (važi 7 dana, radi jednom).
+  prostor i šalje drugom link za poziv (važi 7 dana, radi jednom i samo za
+  mejl drugog roditelja).
 - Radi na telefonu i računaru; ime deteta se nigde ne prikazuje.
 
 ## Kako je zaštićeno
@@ -49,9 +50,13 @@ probati sam.
 - U tabele se ne piše direktno. Svaka promena ide kroz funkciju u bazi, koja
   proverava ko pita i da li sme (npr. predlog kalendara ne može da prihvati
   onaj ko ga je dao).
+- Rešena stavka se ne menja, a svaka izmena otvorene ostaje zapisana u njenom
+  toku. Predlog za kalendar nosi samo ono što drugi roditelj vidi.
 - Dokumenti su u privatnoj kanti, otvaraju se linkom koji važi 10 minuta, a
   otpremljen fajl niko ne može da zameni ni obriše bez pristanka oba
-  roditelja.
+  roditelja. Fotografije se pre slanja ponovo iscrtaju, pa ne nose lokaciju
+  ni podatke o telefonu.
+- Demo važi samo za jedan tab, pa se nikad ne meša sa pravim nalogom.
 - Javni ključ u kodu (`PUBLIC_SUPABASE_KEY`, „publishable key“) je napravljen
   da bude javan; tajni ključevi se nigde ne koriste.
 
@@ -138,7 +143,7 @@ id i tajna u `supabase/.env` kao `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` i
 ```bash
 npm test             # pravila aplikacije (Vitest)
 npm run check        # astro check + svelte-check, bez grešaka i upozorenja
-npm run test:baza    # pravila baze (pgTAP): porodica, MFA, stavke, kalendar, karton, dokumenti, profil, ko šta vidi
+npm run test:baza    # pravila baze (pgTAP): porodica, MFA, stavke, kalendar, karton, dokumenti, profil, ko šta vidi, granice
 npm run smoke        # demo kroz headless Chrome: stavke, tabla, kalendar, karton, dokumenti, profil
 npm run smoke:nalog  # dva prava naloga u odvojenim pregledačima (treba baza + dev:baza)
 ```

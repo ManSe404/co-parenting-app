@@ -16,6 +16,7 @@
   let greska = $state<string | null>(null);
   let radi = $state(false);
   let ucitano = $state(false);
+  let iskljucivanje = $state(false);
 
   async function osvezi() {
     const s = await mfaStanje();
@@ -58,11 +59,15 @@
     }
   }
 
-  async function iskljuci() {
+  async function iskljuci(e: SubmitEvent) {
+    e.preventDefault();
     if (!faktorId) return;
+    greska = null;
     radi = true;
     try {
-      await mfaIskljuci(faktorId);
+      await mfaIskljuci(faktorId, kod);
+      kod = '';
+      iskljucivanje = false;
       await osvezi();
       onPromena?.(false);
     } catch (e) {
@@ -76,7 +81,25 @@
 {#if ucitano}
   {#if ukljucen}
     <p class="stanje ok">Uključena. Posle lozinke ili Google-a tražiće se i kod iz aplikacije.</p>
-    <button class="btn btn-ghost mali" onclick={iskljuci} disabled={radi}>Isključi dvostepenu prijavu</button>
+    {#if iskljucivanje}
+      <p class="stanje">Za isključivanje upiši trenutni kod iz aplikacije za kodove.</p>
+      <form onsubmit={iskljuci}>
+        <input
+          class="input kod"
+          bind:value={kod}
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="7"
+          placeholder="123 456"
+          aria-label="Kod za isključivanje"
+          required
+        />
+        <button class="btn btn-ghost mali" type="submit" disabled={radi}>Isključi</button>
+        <button class="btn btn-ghost mali" type="button" onclick={() => ((iskljucivanje = false), (kod = ''), (greska = null))}>Otkaži</button>
+      </form>
+    {:else}
+      <button class="btn btn-ghost mali" onclick={() => (iskljucivanje = true)}>Isključi dvostepenu prijavu</button>
+    {/if}
   {:else if upis}
     <ol class="koraci">
       <li>Otvori aplikaciju za kodove (Google Authenticator, Authy, 1Password…).</li>

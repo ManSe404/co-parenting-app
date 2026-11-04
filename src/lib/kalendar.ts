@@ -231,6 +231,9 @@ export function napraviZahtev(
     throw new GreskaPravila('Taj boravak više ne postoji.');
   }
   if (ulaz.vrsta === 'obrisi' && ulaz.boravci.length) throw new GreskaPravila('Brisanje ne dodaje boravke.');
+  if (new Set(ulaz.boravci.map((b) => b.vrsta)).size > 1) {
+    throw new GreskaPravila('Redovan raspored i jednokratne promene predlažu se posebno.');
+  }
   ulaz.boravci.forEach((b) => proveriBoravak(b, roditelji));
   const sukobi = preklapanja(ulaz.boravci, boravci, ulaz.vrsta === 'izmeni' ? ulaz.boravakId : null);
   if (sukobi.length) throw new GreskaPravila(`Preklapa se sa postojećim rasporedom: ${sukobi[0]}.`);

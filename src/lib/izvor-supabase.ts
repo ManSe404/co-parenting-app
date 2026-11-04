@@ -27,6 +27,8 @@ function greska(e: unknown): GreskaPravila {
   return new GreskaPravila(poruka(e));
 }
 
+const STRANA = 1000;
+
 async function redovi<T = Red>(upit: PromiseLike<{ data: unknown; error: unknown }>): Promise<T[]> {
   const { data, error } = await upit;
   if (error) throw greska(error);
@@ -62,6 +64,18 @@ export function napraviSupabaseIzvor(): Izvor {
     return data as T;
   }
 
+  // PostgREST returns at most max_rows (1000, supabase/config.toml and the
+  // hosted default) rows per request; read in pages so nothing is cut off.
+  async function sve(tabela: string, poredak?: string): Promise<Red[]> {
+    const svi: Red[] = [];
+    for (let od = 0; ; od += STRANA) {
+      const upit = sb.from(tabela).select('*');
+      const strana = await redovi((poredak ? upit.order(poredak).order('id') : upit.order('id')).range(od, od + STRANA - 1));
+      svi.push(...strana);
+      if (strana.length < STRANA) return svi;
+    }
+  }
+
   return {
     demo: false,
 
@@ -72,13 +86,13 @@ export function napraviSupabaseIzvor(): Izvor {
 
       const [rod, st, un, bo, dg, za, ku, ki, rc] = await Promise.all([
         redovi(sb.from('roditelj').select('korisnik, uloga, oznaka, oznaka_akuzativ, oznaka_genitiv, boja, poslednja_poseta')),
-        redovi(sb.from('stavka').select('*')),
-        redovi(sb.from('unos').select('*').order('kreirano')),
-        redovi(sb.from('boravak').select('*').order('pocetak')),
-        redovi(sb.from('dogadjaj').select('*')),
-        redovi(sb.from('zahtev_kalendara').select('*').order('kreirano')),
-        redovi(sb.from('karton_unos').select('*')),
-        redovi(sb.from('karton_izmena').select('*').order('kada')),
+        sve('stavka'),
+        sve('unos', 'kreirano'),
+        sve('boravak', 'pocetak'),
+        sve('dogadjaj'),
+        sve('zahtev_kalendara', 'kreirano'),
+        sve('karton_unos'),
+        sve('karton_izmena', 'kada'),
         redovi(sb.from('raspored_casova').select('*')),
       ]);
 

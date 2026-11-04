@@ -28,6 +28,10 @@
     }
   });
 
+  // The link is bound to the other parent's e-mail, so a forwarded or leaked
+  // link is worth nothing to anyone else.
+  let mejlIspravan = $derived(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()));
+
   let tekst = $derived(
     poziv ? `Pozivam te u naš zajednički prostor za dete u aplikaciji coparenting. Otvori link i prihvati: ${poziv.link}` : '',
   );
@@ -36,7 +40,7 @@
     greska = null;
     radi = true;
     try {
-      poziv = await napraviPozivnicu(email.trim() || null);
+      poziv = await napraviPozivnicu(email.trim());
     } catch (e) {
       greska = e instanceof Error ? e.message : String(e);
     } finally {
@@ -76,10 +80,11 @@
       </p>
     {/if}
     <label class="field">
-      <span class="label">Mejl drugog roditelja <span class="faint">nije obavezno</span></span>
-      <input class="input" type="email" bind:value={email} placeholder="Ako ga upišeš, samo ta adresa može da prihvati" />
+      <span class="label">Mejl drugog roditelja</span>
+      <input class="input" type="email" bind:value={email} required autocomplete="off" placeholder="adresa kojom će se prijaviti" />
+      <span class="pomoc faint">Samo ta adresa može da prihvati poziv, pa link ne vredi nikom drugom. Za prijavu preko Google-a upiši Gmail adresu.</span>
     </label>
-    <button class="btn" onclick={napravi} disabled={radi}>Napravi link za {koga}</button>
+    <button class="btn" onclick={napravi} disabled={radi || !mejlIspravan}>Napravi link za {koga}</button>
   {:else}
     <p class="dim">Link važi 7 dana i radi samo jednom. Pošalji ga kako ti je najlakše:</p>
     <div class="link">
@@ -97,15 +102,14 @@
 </div>
 
 <style>
+  .pomoc {
+    font-size: 0.78rem;
+  }
+
   .poziv {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-  }
-
-  .label .faint {
-    text-transform: none;
-    letter-spacing: 0.02em;
   }
 
   .link {

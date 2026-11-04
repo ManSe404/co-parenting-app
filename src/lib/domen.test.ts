@@ -6,6 +6,7 @@ import {
   potezZaKolonu,
   cekaDrugog,
   danaDo,
+  izmeni,
   jeHitno,
   naPotezu,
   napraviPregled,
@@ -261,5 +262,26 @@ describe('tabla', () => {
     expect(predlog.stanje).toBe('neodgovoreno');
     expect(povuciPredlog(predlog, TATA, T, true).stavka.stanje).toBe('otvoreno');
     expect(povuciPredlog(predlog, TATA, T).stavka.stanje).toBe('neodgovoreno');
+  });
+});
+
+describe('izmena stavke', () => {
+  it('u tok stavke upisuje šta je bilo i šta je sada (iste reči kao baza)', () => {
+    const r = izmeni(stavka({ datum: '2026-11-10' }), MAMA, { naslov: 'Potvrda za izlet na Avalu', datum: '2026-11-12', oblast: 'ostalo' }, T);
+    expect(r.stavka).toMatchObject({ naslov: 'Potvrda za izlet na Avalu', datum: '2026-11-12', oblast: 'ostalo', izmenjeno: T });
+    expect(r.unos).toMatchObject({
+      vrsta: 'izmenjeno',
+      autor: MAMA,
+      tekst: 'Naslov: „Potvrda za izlet“ → „Potvrda za izlet na Avalu“\nOblast: Škola → Ostalo\nRok: 10. 11. 2026. → 12. 11. 2026.',
+    });
+  });
+
+  it('izmena bez promene se ne beleži', () => {
+    expect(izmeni(stavka(), TATA, { naslov: ' Potvrda za izlet ' }, T).unos).toBeNull();
+  });
+
+  it('rešena stavka i stavka čije zatvaranje čeka potvrdu se ne menjaju', () => {
+    expect(() => izmeni(stavka({ stanje: 'zatvoreno' }), TATA, { naslov: 'x' }, T)).toThrow(/Rešena/);
+    expect(() => izmeni(stavka({ stanje: 'otvoreno', zatvaranjePredlozio: MAMA }), TATA, { opis: 'x' }, T)).toThrow(/čeka potvrdu/);
   });
 });

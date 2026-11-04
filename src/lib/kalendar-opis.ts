@@ -21,6 +21,19 @@ export function opisDogadjaja(p: Podaci, d: PredlogDogadjaja): string {
   return `${d.naziv} · ${kad}${vodi}`;
 }
 
+/**
+ * What changes in an activity beyond its one-line description (kind, place,
+ * note, first day of a series), so the parent who accepts sees every field.
+ */
+export function ostaleRazlike(stari: PredlogDogadjaja, novi: PredlogDogadjaja): string[] {
+  const r: string[] = [];
+  if (stari.vrsta !== novi.vrsta) r.push(`vrsta: ${nazivVrste(stari.vrsta)} → ${nazivVrste(novi.vrsta)}`);
+  if (stari.mesto !== novi.mesto) r.push(`mesto: ${stari.mesto ? `„${stari.mesto}“` : 'bez mesta'} → ${novi.mesto ? `„${novi.mesto}“` : 'bez mesta'}`);
+  if (stari.napomena !== novi.napomena) r.push(novi.napomena ? `napomena: „${novi.napomena}“` : 'napomena obrisana');
+  if (novi.ponavljanje.tip !== 'ne' && stari.datum !== novi.datum) r.push(`počinje: ${datumKratko(stari.datum)} → ${datumKratko(novi.datum)}`);
+  return r;
+}
+
 export function nazivVrste(v: string): string {
   return VRSTE_DOGADJAJA.find((x) => x.kljuc === v)?.naziv ?? v;
 }
@@ -32,9 +45,13 @@ export function opisZahteva(p: Podaci, z: ZahtevKalendara): { naslov: string; re
     if (z.vrsta === 'obrisi') return { naslov: 'Brisanje aktivnosti', redovi: [bilo] };
     if (z.jednom && stari) {
       const tada = `${stari.naziv} · ${datumKratko(z.jednom)} ${stari.ceoDan ? 'ceo dan' : `${stari.od}–${stari.do}`}`;
-      return { naslov: 'Pomeranje, samo jednom', redovi: [`bilo: ${tada}`, `postaje: ${opisDogadjaja(p, z.dogadjaj!)}`] };
+      const ostalo = ostaleRazlike({ ...stari, datum: z.jednom, ponavljanje: { tip: 'ne' } }, z.dogadjaj!);
+      return { naslov: 'Pomeranje, samo jednom', redovi: [`bilo: ${tada}`, `postaje: ${opisDogadjaja(p, z.dogadjaj!)}`, ...ostalo] };
     }
-    if (z.vrsta === 'izmeni') return { naslov: 'Izmena aktivnosti', redovi: [`bilo: ${bilo}`, `postaje: ${opisDogadjaja(p, z.dogadjaj!)}`] };
+    if (z.vrsta === 'izmeni') {
+      const ostalo = stari ? ostaleRazlike(stari, z.dogadjaj!) : [];
+      return { naslov: 'Izmena aktivnosti', redovi: [`bilo: ${bilo}`, `postaje: ${opisDogadjaja(p, z.dogadjaj!)}`, ...ostalo] };
+    }
     return { naslov: `Nova aktivnost: ${nazivVrste(z.dogadjaj!.vrsta).toLocaleLowerCase('sr')}`, redovi: [opisDogadjaja(p, z.dogadjaj!)] };
   }
   if (z.vrsta === 'obrisi' || z.vrsta === 'izmeni') {
@@ -47,7 +64,10 @@ export function opisZahteva(p: Podaci, z: ZahtevKalendara): { naslov: string; re
   const naslov =
     z.boravci[0]?.vrsta === 'redovno' ? (n > 1 ? `Redovan raspored, ${n} termina` : 'Redovan raspored') : 'Jednokratna promena';
   const redovi = z.boravci.slice(0, 3).map((b) => opisBoravka(p, b));
-  if (n > 3) redovi.push(`… i još ${n - 3}`);
+  if (n > 3) {
+    const poslednji = [...z.boravci].sort((a, b) => (a.do < b.do ? -1 : 1)).at(-1)!;
+    redovi.push(`… i još ${n - 3}, poslednji do ${datumKratko(poslednji.do.slice(0, 10))}`);
+  }
   return { naslov, redovi };
 }
 

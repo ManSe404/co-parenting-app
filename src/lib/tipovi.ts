@@ -55,7 +55,8 @@ export type VrstaUnosa =
   | 'povucen_predlog'
   | 'odbijeno_zatvaranje'
   | 'zatvoreno'
-  | 'ponovo_otvoreno';
+  | 'ponovo_otvoreno'
+  | 'izmenjeno';
 
 /** One entry in an item's thread: a reply or a recorded state change. */
 export interface Unos {

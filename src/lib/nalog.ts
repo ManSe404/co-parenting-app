@@ -41,6 +41,9 @@ export function poruka(e: unknown): string {
   if (/provider is not enabled|Unsupported provider/i.test(m)) return 'Prijava preko Google-a još nije podešena.';
   if (/Invalid TOTP code|invalid.*code/i.test(m)) return 'Kod nije tačan. Uzmi novi iz aplikacije i probaj ponovo.';
   if (/rate limit|too many/i.test(m)) return 'Previše pokušaja. Sačekaj malo pa probaj ponovo.';
+  if (/failed to fetch|networkerror|load failed|fetch failed|network request failed/i.test(m)) {
+    return 'Nema veze sa serverom. Proveri internet pa probaj ponovo.';
+  }
   return m;
 }
 
@@ -126,7 +129,12 @@ export async function mfaPotvrdi(faktorId: string, kod: string): Promise<void> {
   if (error) throw new Error(poruka(error));
 }
 
-export async function mfaIskljuci(faktorId: string): Promise<void> {
+/**
+ * Turning MFA off asks for a current code first, so an unlocked phone or
+ * laptop alone is not enough to switch it off.
+ */
+export async function mfaIskljuci(faktorId: string, kod: string): Promise<void> {
+  await mfaPotvrdi(faktorId, kod);
   const { error } = await supabase().auth.mfa.unenroll({ factorId: faktorId });
   if (error) throw new Error(poruka(error));
   await supabase().auth.refreshSession();

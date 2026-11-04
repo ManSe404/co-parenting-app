@@ -6,6 +6,7 @@ import type { Podaci, Stavka } from '../tipovi';
 import {
   GreskaPravila,
   aktiviraj,
+  izmeni,
   type Promena,
   odbijZatvaranje,
   odgovori,
@@ -199,11 +200,7 @@ export function napraviMockIzvor({ demo = true }: { demo?: boolean } = {}): Izvo
     },
 
     async izmeniStavku(id, izmena) {
-      await promeni(id, (s, _ja, t) => {
-        const sledeca = { ...s, ...izmena, izmenjeno: t };
-        proveriNovu(sledeca);
-        return { stavka: { ...sledeca, naslov: sledeca.naslov.trim(), datum: sledeca.datum || null }, unos: null };
-      });
+      await promeni(id, (s, ja, t) => izmeni(s, ja, izmena, t));
     },
 
     odgovori: (id, tekst) => promeni(id, (s, ja, t) => odgovori(s, ja, tekst, t)),

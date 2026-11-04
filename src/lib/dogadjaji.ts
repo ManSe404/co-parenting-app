@@ -203,10 +203,12 @@ export function napraviZahtevDogadjaja(
     boravakId: null,
     boravci: [],
     dogadjajId: ulaz.vrsta === 'dodaj' ? null : ulaz.dogadjajId,
+    // Skipped days never travel in a request: they change only through
+    // "just this once", the same as in the database.
     dogadjaj:
       ulaz.vrsta === 'obrisi' || !d
         ? null
-        : { ...d, naziv: d.naziv.trim(), mesto: d.mesto.trim(), napomena: d.napomena.trim() },
+        : { ...bezIzuzetih(d), naziv: d.naziv.trim(), mesto: d.mesto.trim(), napomena: d.napomena.trim() },
     poruka: ulaz.poruka.trim(),
     predlozio: ja,
     stanje: 'ceka',
@@ -215,6 +217,11 @@ export function napraviZahtevDogadjaja(
     reseno: null,
     resio: null,
   };
+}
+
+function bezIzuzetih(d: PredlogDogadjaja): PredlogDogadjaja {
+  const { izuzeti: _izuzeti, ...ostalo } = d;
+  return ostalo;
 }
 
 export function prihvatiZahtevDogadjaja(
@@ -236,14 +243,18 @@ export function prihvatiZahtevDogadjaja(
     sledeci = [...sledeci, { ...z.dogadjaj, id: noviId(), kreirano: sada }];
     return { zahtev: { ...z, stanje: 'prihvacen', reseno: sada, resio: ja }, dogadjaji: sledeci };
   }
+  let stari: Dogadjaj | undefined;
   if (z.vrsta !== 'dodaj') {
-    if (!dogadjaji.some((d) => d.id === z.dogadjajId)) throw new GreskaPravila('Ta aktivnost više ne postoji.');
+    stari = dogadjaji.find((d) => d.id === z.dogadjajId);
+    if (!stari) throw new GreskaPravila('Ta aktivnost više ne postoji.');
     sledeci = dogadjaji.filter((d) => d.id !== z.dogadjajId);
   }
   if (z.vrsta !== 'obrisi' && z.dogadjaj) {
-    // A change keeps the id, so links and history stay attached to it.
+    // A change keeps the id and the series' skipped days, so links, history
+    // and earlier "just this once" moves stay attached to it.
     const id = z.vrsta === 'izmeni' ? z.dogadjajId! : noviId();
-    sledeci = [...sledeci, { ...z.dogadjaj, id, kreirano: sada }];
+    const izuzeti = z.vrsta === 'izmeni' ? stari?.izuzeti : undefined;
+    sledeci = [...sledeci, { ...bezIzuzetih(z.dogadjaj), ...(izuzeti?.length ? { izuzeti } : {}), id, kreirano: sada }];
   }
   return { zahtev: { ...z, stanje: 'prihvacen', reseno: sada, resio: ja }, dogadjaji: sledeci };
 }
