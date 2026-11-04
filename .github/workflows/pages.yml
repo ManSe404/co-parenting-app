@@ -32,8 +32,11 @@ jobs:
       - uses: withastro/action@v6
         env:
           BASE_PATH: /${{ github.event.repository.name }}
-          PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_KEY: ${{ vars.PUBLIC_SUPABASE_KEY }}
+          # The author's copy talks to its own Supabase project (both values are
+          # public by design: they end up in the site anyway). Forks use their
+          # own repository variables, or get the demo without them.
+          PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL || (github.repository == 'ManSe404/co-parenting-app' && 'https://azhapzvfhgbaibihnwie.supabase.co' || '') }}
+          PUBLIC_SUPABASE_KEY: ${{ vars.PUBLIC_SUPABASE_KEY || (github.repository == 'ManSe404/co-parenting-app' && 'sb_publishable_4onxBdkCWzoUD2Bb98vQhg_XaW2fqZT' || '') }}
 
   deploy:
     if: ${{ vars.OBJAVI_PAGES == 'da' }}
