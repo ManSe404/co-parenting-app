@@ -1,0 +1,246 @@
+---
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/600.css';
+import '@fontsource/space-grotesk/700.css';
+import '@fontsource/dm-mono/400.css';
+import '@fontsource/dm-mono/500.css';
+import '../styles/global.css';
+import Cuvar from '../components/Cuvar.svelte';
+import DemoBiracRoditelja from '../components/DemoBiracRoditelja.svelte';
+import NalogMeni from '../components/NalogMeni.svelte';
+import Ikona from '../components/Ikona.svelte';
+import { putanja, putanje } from '../lib/putanje';
+
+interface Props {
+  title: string;
+  aktivno?: 'pocetna' | 'stavke' | 'kalendar' | 'karton' | 'dokumenti' | 'nova';
+}
+
+const { title, aktivno } = Astro.props;
+const imaBazu = Boolean(import.meta.env.PUBLIC_SUPABASE_URL && import.meta.env.PUBLIC_SUPABASE_KEY);
+const linkovi = [
+  { kljuc: 'pocetna', naziv: 'Početna', ikona: 'pocetna', href: putanje.pocetna() },
+  { kljuc: 'stavke', naziv: 'Stavke', ikona: 'tabla', href: putanje.stavke() },
+  { kljuc: 'kalendar', naziv: 'Kalendar', ikona: 'kalendar', href: putanje.kalendar() },
+  { kljuc: 'karton', naziv: 'Karton', ikona: 'karton', href: putanje.karton() },
+  { kljuc: 'dokumenti', naziv: 'Dokumenti', ikona: 'dokument', href: putanje.dokumenti() },
+];
+---
+
+<!doctype html>
+<html lang="sr-Latn">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#05070b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)" />
+    <title>{title} · coparenting</title>
+    <link rel="icon" href={putanja('/favicon.svg')} type="image/svg+xml" />
+    <!-- Decide the mode before anything paints, so a signed-out visitor never
+         sees app screens flash by on the way to the sign-in page. -->
+    <script is:inline define:vars={{ imaBazu }}>
+      try {
+        const q = new URLSearchParams(location.search).get('demo');
+        if (q === '1') localStorage.setItem('coparenting.demo', '1');
+        if (q === '0') localStorage.removeItem('coparenting.demo');
+        const demo = !imaBazu || localStorage.getItem('coparenting.demo') === '1';
+        document.documentElement.dataset.rezim = demo ? 'demo' : 'baza';
+      } catch {
+        document.documentElement.dataset.rezim = imaBazu ? 'baza' : 'demo';
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="substrate" aria-hidden="true"></div>
+
+    <header class="nav">
+      <div class="nav-inner wrap">
+        <a class="brand" href={putanje.pocetna()}>
+          <span class="brand-dots" aria-hidden="true"><i></i><i></i></span>
+          <span class="brand-name">coparenting</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Glavna navigacija">
+          {linkovi.map((l) => (
+            <a href={l.href} class:list={['nav-link', { 'is-active': aktivno === l.kljuc }]}>
+              {l.naziv}
+            </a>
+          ))}
+          <a href={putanje.nova()} class:list={['btn', 'nav-new', { 'is-active': aktivno === 'nova' }]}>
+            + Nova
+          </a>
+        </nav>
+
+        <!-- The profile circle first: on a phone the demo bar takes a row of its own. -->
+        <NalogMeni client:only="svelte" />
+        <DemoBiracRoditelja client:only="svelte" />
+      </div>
+    </header>
+    <Cuvar client:only="svelte" />
+
+    <main id="main">
+      <div class="wrap">
+        <slot />
+      </div>
+    </main>
+
+    <!-- Phone: the screens as an app-style tab bar at the bottom. -->
+    <nav class="tabovi" aria-label="Ekrani">
+      {linkovi.map((l) => (
+        <a href={l.href} class:list={['tab', { 'is-active': aktivno === l.kljuc }]} aria-current={aktivno === l.kljuc ? 'page' : undefined}>
+          <Ikona ime={l.ikona} velicina={22} />
+          <span>{l.naziv}</span>
+        </a>
+      ))}
+    </nav>
+  </body>
+</html>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--nav-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 3vw, 2rem);
+    padding-block: 0.8rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+
+  /* Two overlapping dots in the site's two accents: two parents, one centre. */
+  .brand-dots {
+    display: flex;
+  }
+
+  .brand-dots i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--bio);
+    box-shadow: 0 0 10px var(--glow-bio);
+  }
+
+  .brand-dots i + i {
+    margin-left: -3px;
+    background: var(--ai);
+    opacity: 0.9;
+    box-shadow: none;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.6rem, 1.8vw, 1.5rem);
+    margin-left: auto;
+  }
+
+  /* Tablet: five links and the demo switcher need the brand's room. */
+  @media (min-width: 681px) and (max-width: 1000px) {
+    .brand-name {
+      display: none;
+    }
+  }
+
+  .nav-link {
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    transition: color 0.2s var(--ease);
+  }
+
+  .nav-link:hover,
+  .nav-link.is-active {
+    color: var(--text);
+  }
+
+  .nav-link.is-active {
+    text-decoration: underline;
+    text-decoration-color: var(--bio);
+    text-underline-offset: 0.45em;
+    text-decoration-thickness: 1px;
+  }
+
+  .nav-new {
+    padding: 0.45rem 0.85rem;
+    white-space: nowrap;
+  }
+
+  /* Phone: brand dots and links on one row, the demo switcher wraps below. */
+  @media (max-width: 520px) {
+    .nav-inner {
+      flex-wrap: wrap;
+      row-gap: 0.55rem;
+    }
+  }
+
+  .tabovi {
+    display: none;
+  }
+
+  /* With real accounts, app screens stay hidden until the gatekeeper says ok. */
+  :global(html[data-rezim='baza']:not([data-pristup='ok'])) main,
+  :global(html[data-rezim='baza']:not([data-pristup='ok'])) .tabovi {
+    visibility: hidden;
+  }
+
+  /* Phone: top bar keeps the brand and "+ Nova"; the screens move to the bottom. */
+  @media (max-width: 680px) {
+    .nav-link {
+      display: none;
+    }
+
+    .tabovi {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
+      background: var(--nav-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+    }
+
+    .tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      padding: 0.35rem 0;
+      font-size: 0.68rem;
+      color: var(--text-faint);
+      border-radius: 10px;
+    }
+
+    .tab.is-active {
+      color: var(--bio);
+    }
+
+    .tab.is-active :global(svg) {
+      filter: drop-shadow(0 0 6px var(--glow-bio));
+    }
+  }
+</style>
