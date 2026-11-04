@@ -290,7 +290,7 @@ vlasnika dele isto poreklo (origin), pa bi svaki od njih mogao da pročita
 prijavu sačuvanu u pregledaču; aplikacija sa zdravstvenim podacima i
 dokumentima dobija svoju adresu. Build: `npm run build`, izlaz `dist`, Node iz
 `.node-version`. GitHub Pages workflow (`.github/workflows/pages.yml`) ostaje
-za forkove i uključuje se promenljivom `GITHUB_PAGES=da`.
+za forkove i uključuje se promenljivom `OBJAVI_PAGES=da` (GitHub ne dozvoljava imena koja počinju sa `GITHUB_`).
 
 **Otvoren kod, privatna kopija** (2026-11-04): repo je javan pod MIT
 licencom, da svako može da podigne svoju kopiju (uputstvo u README). Kopija

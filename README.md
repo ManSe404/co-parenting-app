@@ -92,7 +92,7 @@ Treba ti nalog na GitHub-u i besplatan nalog na [supabase.com](https://supabase.
 
    Ili **GitHub Pages** (workflow je u `.github/workflows/pages.yml`, isključen
    dok ga ne uključiš): *Settings → Pages → Source: GitHub Actions*, pa pod
-   *Settings → Secrets and variables → Actions → Variables* `GITHUB_PAGES` =
+   *Settings → Secrets and variables → Actions → Variables* `OBJAVI_PAGES` =
    `da` i iste dve Supabase promenljive. Adresa je
    `https://<korisnik>.github.io/<ime-repoa>/`; na njoj su i tvoji ostali
    GitHub Pages sajtovi, pa dele prijavu sačuvanu u pregledaču.
