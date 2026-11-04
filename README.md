@@ -12,8 +12,8 @@ agreements, a custody and activities calendar, the child's record and
 documents. Anything that concerns both needs the other parent's consent, and
 the database enforces it. The interface is in Serbian (Latin script).*
 
-**Probaj bez naloga:** pokreni lokalno (ispod) ili otvori bilo koju objavljenu
-kopiju sa `?demo=1` na kraju adrese. Demo radi na probnim podacima u
+**Probaj bez naloga:** https://manse404.github.io/co-parenting-app/?demo=1
+(ili lokalno, ispod). Demo radi na probnim podacima u
 pregledaču; birač **Tata / Mama** gore menja ulogu, pa se ceo tok može
 probati sam.
 
