@@ -1,0 +1,8 @@
+---
+import Ulaz from '../../layouts/Ulaz.astro';
+import Mfa from '../../components/Mfa.svelte';
+---
+
+<Ulaz title="Kod za prijavu">
+  <Mfa client:only="svelte" />
+</Ulaz>

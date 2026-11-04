@@ -1,0 +1,8 @@
+---
+import App from '../layouts/App.astro';
+import Pocetna from '../components/Pocetna.svelte';
+---
+
+<App title="Početna" aktivno="pocetna">
+  <Pocetna client:only="svelte" />
+</App>

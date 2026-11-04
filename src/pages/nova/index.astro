@@ -1,0 +1,8 @@
+---
+import App from '../../layouts/App.astro';
+import NovaStavka from '../../components/NovaStavka.svelte';
+---
+
+<App title="Nova stavka" aktivno="nova">
+  <NovaStavka client:only="svelte" />
+</App>

@@ -1,0 +1,566 @@
+/* ==========================================================================
+   Design tokens, taken from the author's site (manse404.github.io/webpage):
+   near-black substrate, teal accent, violet accent, mono type for labels and
+   anything that reads as data. The app adds a light theme that follows the
+   phone setting, and three meaning colours (urgent, waiting, important).
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --bg: #05070b;
+  --bg-raised: #0a0e15;
+  --surface: rgba(255, 255, 255, 0.028);
+  --surface-hover: rgba(255, 255, 255, 0.055);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --nav-bg: rgba(5, 7, 11, 0.82);
+  --grid-line: rgba(255, 255, 255, 0.028);
+
+  --text: #e8edf4;
+  --text-dim: #97a3b6;
+  --text-faint: #5f6b7d;
+
+  --bio: #2dd4bf;
+  --bio-soft: rgba(45, 212, 191, 0.08);
+  --bio-line: rgba(45, 212, 191, 0.3);
+  --ai: #a78bfa;
+  --ai-soft: rgba(167, 139, 250, 0.08);
+  --ai-line: rgba(167, 139, 250, 0.3);
+  --warn: #fbbf24;
+  --warn-soft: rgba(251, 191, 36, 0.08);
+  --warn-line: rgba(251, 191, 36, 0.3);
+  --hitno: #fb7185;
+  --hitno-soft: rgba(251, 113, 133, 0.08);
+  --hitno-line: rgba(251, 113, 133, 0.32);
+  --on-accent: #04121a;
+
+  --glow-bio: rgba(45, 212, 191, 0.5);
+  --bloom-bio: rgba(45, 212, 191, 0.1);
+  --bloom-ai: rgba(167, 139, 250, 0.09);
+
+  --oblast-skola: #60a5fa;
+  --oblast-zdravlje: #2dd4bf;
+  --oblast-vanskolske: #a78bfa;
+  --oblast-potrebe: #fdba74;
+  --oblast-ostalo: #97a3b6;
+
+  /* Calendar activities: kept apart from the parents' teal and violet. */
+  --akt-trening: #fb923c;
+  --akt-rodjendan: #f472b6;
+  --akt-skola: #60a5fa;
+  --akt-lekar: #a3e635;
+  --akt-ostalo: #94a3b8;
+
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --wrap: 1180px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --radius: 14px;
+  --radius-sm: 8px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Height of the phone tab bar, so toasts and page ends clear it. */
+  --donja-traka: 0px;
+}
+
+@media (max-width: 680px) {
+  :root {
+    --donja-traka: calc(3.9rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --bg: #f5f7fa;
+    --bg-raised: #ffffff;
+    --surface: #ffffff;
+    --surface-hover: #fbfcfd;
+    --border: rgba(15, 23, 32, 0.1);
+    --border-strong: rgba(15, 23, 32, 0.2);
+    --nav-bg: rgba(245, 247, 250, 0.86);
+    --grid-line: rgba(15, 23, 32, 0.035);
+
+    --text: #0f1720;
+    --text-dim: #4a5566;
+    --text-faint: #8590a0;
+
+    --bio: #0d9488;
+    --bio-soft: rgba(13, 148, 136, 0.08);
+    --bio-line: rgba(13, 148, 136, 0.32);
+    --ai: #7c3aed;
+    --ai-soft: rgba(124, 58, 237, 0.07);
+    --ai-line: rgba(124, 58, 237, 0.28);
+    --warn: #b45309;
+    --warn-soft: rgba(217, 119, 6, 0.08);
+    --warn-line: rgba(217, 119, 6, 0.32);
+    --hitno: #e11d48;
+    --hitno-soft: rgba(225, 29, 72, 0.06);
+    --hitno-line: rgba(225, 29, 72, 0.3);
+    --on-accent: #ffffff;
+
+    --glow-bio: rgba(13, 148, 136, 0.25);
+    --bloom-bio: rgba(13, 148, 136, 0.07);
+    --bloom-ai: rgba(124, 58, 237, 0.05);
+
+    --oblast-skola: #2563eb;
+    --oblast-zdravlje: #0d9488;
+    --oblast-vanskolske: #7c3aed;
+    --oblast-potrebe: #c2410c;
+    --oblast-ostalo: #4a5566;
+
+    --akt-trening: #ea580c;
+    --akt-rodjendan: #db2777;
+    --akt-skola: #2563eb;
+    --akt-lekar: #65a30d;
+    --akt-ostalo: #64748b;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reset
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bio);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--bio);
+  color: var(--on-accent);
+}
+
+/* The site's faint engineering grid and its two colour blooms, kept still. */
+.substrate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(46rem 30rem at 8% -10%, var(--bloom-bio), transparent 62%),
+    radial-gradient(42rem 28rem at 92% 0%, var(--bloom-ai), transparent 60%);
+}
+
+/* Cards rise in once, in order; off when the phone asks for less motion. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.rise {
+  animation: rise 0.6s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+.substrate {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 58px 58px;
+  mask-image: radial-gradient(ellipse 100% 60% at 50% 0%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 60% at 50% 0%, #000 20%, transparent 75%);
+}
+
+/* --------------------------------------------------------------------------
+   Layout and type
+   -------------------------------------------------------------------------- */
+
+.wrap {
+  width: min(100% - var(--gutter) * 2, var(--wrap));
+  margin-inline: auto;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(1.5rem, 4vw, 2.75rem) calc(4rem + var(--donja-traka));
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+h1 {
+  font-size: clamp(1.7rem, 4.5vw, 2.4rem);
+}
+
+h2 {
+  font-size: clamp(1.15rem, 2.4vw, 1.35rem);
+}
+
+h3 {
+  font-size: 1.02rem;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bio);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 1.5rem;
+  height: 1px;
+  background: linear-gradient(90deg, currentColor, transparent);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.dim {
+  color: var(--text-dim);
+}
+
+.faint {
+  color: var(--text-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Surfaces
+   -------------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(1rem, 2.2vw, 1.4rem);
+  position: relative;
+}
+
+a.card,
+.card-link {
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+a.card:hover,
+.card-link:hover {
+  background: var(--surface-hover);
+  border-color: var(--bio-line);
+}
+
+/* --------------------------------------------------------------------------
+   Chips
+   -------------------------------------------------------------------------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+  white-space: nowrap;
+}
+
+.chip-bio {
+  color: var(--bio);
+  border-color: var(--bio-line);
+  background: var(--bio-soft);
+}
+
+.chip-ai {
+  color: var(--ai);
+  border-color: var(--ai-line);
+  background: var(--ai-soft);
+}
+
+.chip-warn {
+  color: var(--warn);
+  border-color: var(--warn-line);
+  background: var(--warn-soft);
+}
+
+.chip-hitno {
+  color: var(--hitno);
+  border-color: var(--hitno-line);
+  background: var(--hitno-soft);
+}
+
+/* Filter chips are buttons/links that toggle. */
+.chip-toggle {
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.chip-toggle:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.chip-toggle[aria-pressed='true'],
+.chip-toggle.is-active {
+  color: var(--bio);
+  border-color: var(--bio);
+  background: var(--bio-soft);
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bio);
+  background: var(--bio-soft);
+  color: var(--bio);
+  transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.btn:hover {
+  box-shadow: 0 0 22px -8px var(--glow-bio);
+  background: color-mix(in srgb, var(--bio) 16%, transparent);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-ghost {
+  border-color: var(--border-strong);
+  background: transparent;
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: var(--surface-hover);
+  border-color: var(--text-dim);
+  box-shadow: none;
+}
+
+.btn-danger {
+  border-color: var(--hitno-line);
+  background: transparent;
+  color: var(--hitno);
+}
+
+.btn-danger:hover {
+  background: var(--hitno-soft);
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Forms
+   -------------------------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.input {
+  width: 100%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.85rem;
+  font-size: 1rem;
+  transition: border-color 0.2s var(--ease);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--bio);
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 5.5rem;
+  line-height: 1.5;
+}
+
+.error {
+  color: var(--hitno);
+  font-size: 0.9rem;
+}
+
+/* --------------------------------------------------------------------------
+   Dialogs. The reset above sets every margin to 0, which also removes the
+   margin:auto that centres a modal dialog; without this line every dialog
+   opens stuck in the top-left corner.
+   -------------------------------------------------------------------------- */
+
+dialog {
+  margin: auto;
+}
+
+dialog.dijalog {
+  width: min(100% - 2rem, var(--sirina-dijaloga, 30rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  color: var(--text);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6);
+}
+
+dialog.dijalog[open] {
+  animation: dijalog-ulaz 0.22s var(--ease);
+}
+
+dialog.dijalog::backdrop {
+  background: rgba(5, 7, 11, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+@keyframes dijalog-ulaz {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* Status dot used in lists and counters. */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-faint);
+}
+
+.dot-neodgovoreno {
+  background: var(--warn);
+}
+
+.dot-otvoreno {
+  background: var(--bio);
+}
+
+.dot-zatvoreno {
+  background: var(--text-faint);
+}
+
+.loading {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding-block: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}

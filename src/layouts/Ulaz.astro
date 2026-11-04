@@ -1,0 +1,80 @@
+---
+// Layout for the screens before the app: sign-in, MFA, welcome, invitation.
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/600.css';
+import '@fontsource/space-grotesk/700.css';
+import '@fontsource/dm-mono/400.css';
+import '@fontsource/dm-mono/500.css';
+import '../styles/global.css';
+import { putanja } from '../lib/putanje';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="sr-Latn">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#05070b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)" />
+    <title>{title} · coparenting</title>
+    <link rel="icon" href={putanja('/favicon.svg')} type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="substrate" aria-hidden="true"></div>
+    <main class="ulaz">
+      <a class="brand" href={putanja('/')}>
+        <span class="brand-dots" aria-hidden="true"><i></i><i></i></span>
+        <span>coparenting</span>
+      </a>
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  .ulaz {
+    width: min(100% - 2rem, 28rem);
+    margin-inline: auto;
+    padding-block: clamp(2rem, 8vh, 5rem) 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.95rem;
+    align-self: center;
+  }
+
+  .brand-dots {
+    display: flex;
+  }
+
+  .brand-dots i {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bio);
+    box-shadow: 0 0 10px var(--glow-bio);
+  }
+
+  .brand-dots i + i {
+    margin-left: -4px;
+    background: var(--ai);
+    opacity: 0.9;
+    box-shadow: none;
+  }
+</style>

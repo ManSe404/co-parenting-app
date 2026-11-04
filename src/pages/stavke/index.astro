@@ -1,0 +1,8 @@
+---
+import App from '../../layouts/App.astro';
+import Stavke from '../../components/Stavke.svelte';
+---
+
+<App title="Stavke" aktivno="stavke">
+  <Stavke client:only="svelte" />
+</App>

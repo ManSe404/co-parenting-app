@@ -1,0 +1,8 @@
+---
+import Ulaz from '../../layouts/Ulaz.astro';
+import Poziv from '../../components/Poziv.svelte';
+---
+
+<Ulaz title="Poziv">
+  <Poziv client:only="svelte" />
+</Ulaz>
