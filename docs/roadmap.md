@@ -1,355 +1,182 @@
-# Coparenting app — plan
+# Roadmap
 
-Naziv: `co-parenting-app` · nacrt od 2026-11-03 · odluke u odeljku 9.
+Goals and phases with their status. The plan behind them was written in Serbian; it is kept, translated, at the end
+of this page with its reasoning, its tests and its decisions, and its first five sections now live with their
+topic.
 
-## 1. Šta pravimo
+## Goal
 
-Jedno zajedničko mesto za oba roditelja jednog deteta. Tu se postavljaju pitanja,
-beleže odgovori i odluke i prati sve što se tiče škole, zdravlja, vanškolskih
-aktivnosti i detetovih potreba. Pristupaju samo dva roditelja i oba imaju ista prava.
+One place where two separated parents decide together, with the consent rule enforced by the database, and open
+code that any family can run as its own copy on free services. See [product/vision.md](product/vision.md).
 
-Ovo nije ćaskanje. Svaka stavka je jedna tema sa jasnim stanjem: čeka odgovor,
-dogovaramo se ili rešeno. Kad se tema zatvori, odluka ostaje zapisana.
+## Phases
 
-## 2. Principi
-
-- **Jednostavno.** Glavna su tri ekrana: početna (dashboard), lista stavki i
-  jedna stavka. Na telefonu se instalira kao aplikacija (PWA).
-- **Ništa se ne briše.** Stavka se zatvara, ne briše. Svaka izmena pamti ko ju je
-  napravio i kada. To štiti oba roditelja podjednako.
-- **Ista prava.** U aplikaciji nema admina.
-- **Dizajn kao na sajtu.** Isti tokeni kao manse404.github.io/webpage:
-  Space Grotesk + DM Mono, tamna podloga, teal i ljubičasti akcenat, kartice sa
-  tankom ivicom, čipovi, mali mono natpisi iznad sekcija. Bez animirane pozadine.
-  Pored tamne ide i svetla tema koja prati podešavanje telefona.
-- **Privatnost.** Podaci o detetu, uključujući zdravlje, čuvaju se u EU. Pristup
-  imaju samo dva naloga. Nema analitike ni praćenja.
-
-## 3. Pojmovi
-
-Osnovna jedinica je **stavka**, odnosno pitanje ili tema. Svaka stavka ima tri
-nezavisne osobine:
-
-| Osobina | Vrednosti | Napomena |
-|---|---|---|
-| Stanje | Neodgovoreno · Otvoreno · Zatvoreno | tok jedne teme |
-| Oblast | Škola · Zdravlje · Vanškolske aktivnosti · Detetove potrebe · Ostalo | tačno jedna |
-| Oznake | Važno · Hitno | obe, jedna ili nijedna |
-
-Važno i Hitno su oznake, a ne oblasti. Stavka „Hitno + Zdravlje“ je jedna stavka
-i vidi se i pod Hitno i pod Zdravlje.
-
-### Predlog značenja stanja
-
-- **Neodgovoreno**: jedan roditelj je postavio pitanje, a drugi još nije odgovorio.
-  Uvek se vidi ko je na potezu.
-- **Otvoreno**: oba roditelja su se uključila, ali odluka još nije doneta.
-- **Zatvoreno**: odluka je zapisana ili tema više nije aktuelna.
-
-Prelazi:
-
-- nova stavka → Neodgovoreno; čeka drugog roditelja
-- drugi roditelj odgovori → Otvoreno (automatski)
-- zatvaranje traži upis odluke. Predlog je da jedan roditelj predloži zatvaranje,
-  a drugi ga potvrdi.
-- zatvorena stavka može ponovo da se otvori, uz upisan razlog
-
-**Hitno** se postavlja ručno. Pored toga, pod Hitno automatski ulazi svaka
-nezatvorena stavka čiji rok ističe u naredna 3 dana.
-
-## 4. Početna (dashboard)
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│ utorak, 3. novembar                                            │
-│ ČEKA TEBE 2  ·  ČEKA MAMU 1  ·  NOVO OD POSLEDNJE POSETE 3     │
-├────────────────────┬────────────────────┬──────────────────────┤
-│ NEODGOVORENO   3   │ OTVORENO   5       │ ZATVORENO (30 d)  4  │
-├────────────────────┴──────┬─────────────┴──────────────────────┤
-│ HITNO                     │ VAŽNO                              │
-│ · Potvrda za izlet   ⏱ 2d │ · Letovanje: termini               │
-│ · Kontrola kod lekara     │ · Upis na plivanje                 │
-├─────────────┬─────────────┼──────────────┬─────────────────────┤
-│ ŠKOLA     3 │ ZDRAVLJE  2 │ VANŠKOLSKE 1 │ DETETOVE POTREBE 2  │
-│ dve stavke  │ dve stavke  │ jedna stavka │ dve stavke          │
-├─────────────┴─────────────┴──────┬───────┴─────────────────────┤
-│ PREDSTOJEĆE (14 dana)            │ NOVO OD POSLEDNJE POSETE    │
-│ čet 5.11  roditeljski sastanak   │ mama: odgovorila na „Jakna“ │
-│ pon 9.11  rok: potvrda za izlet  │ mama: nova stavka „Izlet“   │
-└──────────────────────────────────┴─────────────────────────────┘
-```
-
-Redosled (2026-11-03), isti na telefonu i računaru:
-**Hitno + Važno** na vrhu → Čeka tebe / Čeka mamu / Novo → Na tebi je → Tabla
-(traka sa brojem stavki po kolonama) → oblasti → Predstojeće → Novo od poslednje
-posete. Hitno mora uvek da se vidi: crvena ivica, odbrojavanje roka („kasni 1 dan“,
-„danas“, „za 2 dana“). Prazno Hitno postaje mirna siva kartica.
-
-Ton početne je ljudski: pozdrav po dobu dana, ime deteta i jedna rečenica
-umesto zida brojeva („Dve stvari su hitne. Na tebi su tri teme.“). Oblasti imaju
-ikonice i svoju boju.
-
-**Iz zahteva:** Neodgovoreno, Otvoreno, Zatvoreno; Važno, Hitno; Škola, Zdravlje,
-Vanškolske aktivnosti, Detetove potrebe.
-
-**Predlog dodataka:**
-
-| # | Dodatak | Šta daje | Faza |
+| Phase | What | Status | Described in |
 |---|---|---|---|
-| 1 | Čeka tebe / čeka drugog roditelja | deli Neodgovoreno po tome ko je na potezu; najkorisniji broj na ekranu | v1 |
-| 2 | Predstojeće (14 dana) | rokovi stavki i termini: pregledi, roditeljski sastanci, takmičenja | v1 |
-| 3 | Novo od poslednje posete | šta je drugi roditelj dodao ili odgovorio od tvoje poslednje posete | v1 |
-| 4 | Karton deteta | stalni podaci: pedijatar, škola i učitelj(ica), treneri, alergije i terapija, veličina odeće i obuće | v1, kao Karton (2026-11-04), odeljak 5 |
-| 5 | Kod koga je dete + sledeća primopredaja | raspored boravka | v1, kao Kalendar (2026-11-04), odeljak 5 |
-| 6 | Zajednički troškovi | ko je šta platio i saldo | v3, samo ako oba roditelja žele |
+| F0, setup | Astro project, Supabase schema with RLS and functions, the local database, accounts, MFA, the family space and the invitation; items, calendar and record moved into the database | done | [accounts](product/features/accounts.md), [architecture](architecture/overview.md) |
+| F1, MVP | home, items (board, list, one item, new item, every state change), calendar with stays and activities, record, history of agreements, CSV export | done, except installing on a phone as an app (PWA) | [home](product/features/home.md), [items](product/features/items.md), [calendar](product/features/calendar.md), [record](product/features/record.md) |
+| Documents | private storage, trash, deleting for good when both parents agree | done | [documents](product/features/documents.md) |
+| F2 | e-mail notifications, live updates (Realtime), the privacy page and deleting a family space | done; e-mail needs the setup in [operations/deployment.md](operations/deployment.md) | [notifications](product/features/notifications.md), [privacy](product/features/privacy.md) |
+| F3, optional | shared expenses, only if both parents want them | not started | |
 
-## 5. Ekrani
+## Later, or not built
 
-- **Početna**: odeljak 4.
-- **Stavke: Tabla** (podrazumevano). Tri kolone: **Stavke** (neodgovoreno),
-  **Aktivno** (otvoreno) i **Rešeno** (zatvoreno + predlozi koji čekaju potvrdu).
-  Kartice se prevlače levo-desno: mišem odmah, a na telefonu posle kratkog
-  zadržavanja prsta, da bi običan pokret i dalje skrolovao. Šta prevlačenje znači:
+- Installing on a phone as an app (PWA), planned for F1.
+- Export to XLSX, and a weekly automatic export through a GitHub Action that would also be a backup and keep a
+  free Supabase project from pausing after a week without activity. Only CSV export from the screens exists.
+- Linking a document to an item or to the record.
+- Limiting stays to a period: Supabase returns at most 1000 rows per request (`max_rows`).
+- A one-way copy from Supabase to a Google Sheet, only if a sheet for reading is ever needed. The sheet would
+  never be a source of data.
 
-  | Odakle → kuda | Šta se dešava |
-  |---|---|
-  | Stavke → Aktivno | pomera u Aktivno, uz napomenu koja nije obavezna (npr. „pričali smo telefonom“) |
-  | Stavke ili Aktivno → Rešeno | predlog zatvaranja: traži odluku, a drugi roditelj potvrđuje |
-  | Rešeno (svoj predlog) → Aktivno | povlači predlog |
-  | Rešeno (tuđi predlog) → Aktivno | odbija predlog, uz razlog |
-  | Rešeno (zatvoreno) → Aktivno | ponovo otvara, uz razlog |
-  | bilo šta → Stavke | nije dozvoljeno; poruka objašnjava zašto |
+## Where the plan and the code differ
 
-  Predlog koji čeka tvoju potvrdu ima na kartici dugmad **Potvrdi** i **Odbij**.
-  Rešeno prikazuje poslednjih 30 dana, a starije je u Listi.
-- **Kalendar** (2026-11-04), u stilu Google kalendara. Sadrži kod koga
-  je dete i detetove aktivnosti.
-  - **Prikazi:** Dan · Nedelja · Mesec · Raspored. Na telefonu je Nedelja
-    3 dana. Strelice ‹ › pomeraju za dan, nedelju ili mesec. „Danas“ radi u
-    svakom prikazu: vraća na danas i skroluje satnicu na trenutno vreme. Klik na
-    dan u zaglavlju nedelje otvara taj dan. Izbor prikaza se pamti na uređaju.
-  - **Kod koga je:** svaki dan je obojen bojom roditelja (tata tirkizna, mama
-    ljubičasta, kao dve tačke u logou). Jednokratne promene su šrafirane.
-  - **Prelazak:** kockica „⇄ 15:00 · Ide kod tate“ sa „ti preuzimaš“ ili
-    „preuzima mama“, istaknuta kad preuzimaš ti. Naziv je izabran da govori šta
-    se dešava detetu („ide kod tate“), a ne zvuči kao zapisnik („primopredaja“).
-    Isto piše na vrhu kalendara, u rasporedu i na početnoj („Danas u 15:00 ide
-    kod tate · ti preuzimaš“). U mesecu je to oznaka „⇄ 15:00“.
-  - **Aktivnosti:** trening, rođendan, škola, lekar, ostalo, svaka sa svojom
-    bojom koja se ne meša sa bojama roditelja. Aktivnost traje jedan dan (ceo dan
-    ili od–do) i može da se ponavlja svake nedelje ili svake druge, izabranim
-    danima, do datuma. Ima i polja „ko vodi“, mesto i napomenu. U nedelji i danu
-    su aktivnosti blokovi na satnici, preklopljene dele širinu, a klik otvara
-    detalje. Klik na prazno mesto predlaže aktivnost u to vreme. Stavke sa
-    datumom stoje u redu „ceo dan“.
-  - **Prevlačenje** („naravno svaka promena čeka potvrdu“):
-    - aktivnost se prevlači na drugi dan ili sat (nedelja i dan) ili na drugi
-      dan (mesec). Kod ponavljanja biraš „samo ovaj put“ (serija preskače taj
-      dan, a umesto njega je jednokratna aktivnost) ili „svaki put“ (menja dan
-      u nedelji i vreme serije);
-    - kockica prelaska se vuče gore ili dole i tako predlaže drugo vreme tog
-      dana. To je jednokratna promena za razliku u vremenu, a redovan raspored
-      ostaje isti;
-    - mišem odmah, prstom posle kratkog zadržavanja. Dok vučeš, isprekidan
-      okvir pokazuje gde će aktivnost ili prelazak pasti i u koje vreme;
-    - kad pustiš, iskoči „Bilo / Postaje“ sa porukom. Ništa se ne menja dok
-      drugi roditelj ne prihvati.
-  - **Niko ne menja kalendar sam.** Ovo važi za boravak i za aktivnosti.
-    Dodavanje, izmena, brisanje i prevlačenje su zahtevi koje drugi roditelj
-    prihvata. Dok to ne uradi, ništa se ne menja: predlog je isprekidan, a dan sa
-    predlogom ima narandžast okvir. Predlagač ne može da prihvati svoj zahtev,
-    samo da ga povuče. Odbijanje traži razlog. Sve ostaje u „Istoriji promena“.
-  - **Boravak ima dva sloja:** redovan raspored (može da se ponavlja) i
-    jednokratne promene, koje važe preko redovnog. Boravci istog sloja se ne
-    preklapaju, a pri prihvatanju se to proverava ponovo.
-  - Predlozi koji čekaju tebe ulaze u „Čeka tebe“ i „Na tebi je“ na početnoj.
-- **Karton** (2026-11-04): stalni podaci o detetu.
-  - Raspored: u zaglavlju su ime, uzrast i osnovni podaci (datum rođenja,
-    puno ime). Ispod su **Škola · Zdravlje**, pa **Važni kontakti · Mere i
-    veličine**, pa preko cele širine **Raspored časova** i **Drugari**.
-    **Vanškolske aktivnosti** su na dnu, preko cele širine, kao
-    kartice jedna pored druge. Svaka aktivnost pokazuje i „U kalendaru: …“ ako
-    u kalendaru postoji aktivnost istog imena. Posebna strana za aktivnosti nije
-    pravljena: donja traka na telefonu već ima pet ikonica, a termini su u
-    kalendaru.
-  - Grupe sa pojedinačnim podacima: Škola, Zdravlje, Mere i veličine, Osnovno.
-    U Školi, Merama i Osnovnom aplikacija nudi polja koja fale kao dugmiće
-    („+ Visina“). **Zdravlje** (2026-11-04) ima samo „+ Dodaj“, a
-    predlozi (Pedijatar, Alergije, Vakcine…) se nude tek dok se kuca naziv.
-  - **Škola** ima i spisak **Nastavnici** (ime, predmet ili uloga, kontakt,
-    napomena) sa „+ Dodaj nastavnika“, koliko god treba. Ranije polje
-    „Učitelj(ica)“ je ukinuto.
-  - **Raspored časova** je posebna kartica (2026-11-04). Može se:
-    - upisati ručno u tabelu dani × časovi, uz dodavanje i skidanje časova i
-      napomenu (npr. smene);
-    - uvesti iz Excela (.xlsx, prvi list) ili CSV-a. Prepoznaju se separatori
-      `;` i `,`, dani latinicom, ćirilicom ili na engleskom, dani u kolonama ili
-      u redovima, i časovi kao „1.“ ili „8:00–8:45“. Pre čuvanja se uvezena
-      tabela pregleda i ispravlja. Excel se čita bez dodatne biblioteke;
-    - slikati ili otpremiti kao slika, koja se pre čuvanja smanjuje i otvara
-      se uvećana.
-    Na računaru je cela tabela sa istaknutim današnjim danom. Na telefonu su
-    dugmići za dane i spisak časova tog dana. Promene ulaze u „Promene u
-    kartonu“. U bazi slika ide u privatno skladište (kao dokumenti), a ne u
-    tabelu.
-  - **Drugari** (2026-11-04): drugar ili drugarica, roditelj, telefon
-    roditelja (klik poziva) i napomena.
-  - Grupe-spiskovi: **Vanškolske aktivnosti** i **Važni kontakti**. Može ih biti
-    koliko god treba. Svaka aktivnost je kartica sa svojim terminima, mestom,
-    trenerom ili kontaktom i napomenom, a svaki kontakt ima telefon i napomenu.
-  - Oba roditelja menjaju direktno, bez potvrde, ali svaka promena pamti ko,
-    kada, staro i novo („Promene u kartonu“). Drugi roditelj je vidi na
-    početnoj pod „Novo“.
-  - Dok je jedna izmena otvorena, ostala dugmad su zaključana, da se otkucano ne
-    izgubi.
-  - Iz datuma rođenja se računa uzrast.
-- **Istorija dogovora** (2026-11-04: pripada stavkama, ne kartonu):
-  treći prikaz na ekranu Stavke (Tabla · Lista · Istorija). Sadrži sve zatvorene
-  stavke sa dogovorom, po mesecima i najnovije prve, sa pitanjem ko je pitao i
-  ko je potvrdio. Ima filter po oblasti, pretragu i izvoz CSV. „Starije rešene“
-  sa table vodi ovde.
-- **Dokumenti** (2026-11-04: posebna strana pored Kartona; urađeno
-  istog dana): potvrde, nalazi, računi, skenovi. Kartice sa sličicom, nazivom,
-  kategorijom i datumom; pretraga i filter po kategoriji (Škola, Zdravlje,
-  Vanškolske, Lična dokumenta, Pravno i dogovori, Računi, Ostalo). Dodavanje:
-  na telefonu „Slikaj“ ili izbor fajla, na računaru i prevlačenje. Pregled:
-  slika ili PDF u aplikaciji (na telefonu PDF u novoj kartici), Otvori, Preuzmi,
-  Izmeni, Obriši, i trag ko je šta uradio. Obrisani čekaju u odeljku
-  „Obrisani“, odakle ih svako od vas vraća. Dokument koji je drugi roditelj
-  dodao od tvoje poslednje posete ima oznaku „novo“.
-- **Profil roditelja** (2026-11-04; migracija
-  `20261104040000_profil_roditelja.sql`): u Podešavanjima (kružić sa slovom
-  gore desno, i u demou) svako uređuje svoj profil: ime i prezime, telefon,
-  adresa (gde je dete kod tebe, za primopredaju), mejl za kontakt i napomena
-  (npr. radno vreme). Drugi roditelj to vidi; telefon je link za poziv, adresa
-  otvara mapu, mejl otvara poštu. U bazi su to kolone u `roditelj`, a menjaju se
-  samo kroz `sacuvaj_profil`, koja dira isključivo tvoj red. Uloge Tata/Mama i
-  njihovi padeži ostaju fiksni.
-- **Navigacija:** Početna · Stavke · Kalendar · Karton · Dokumenti. Na telefonu
-  su to ikonice u donjoj traci, kao u aplikacijama, a gore ostaju logo i
-  „+ Nova“. Na računaru je sve u gornjoj traci.
-- **Stavke: Lista**: filteri po stanju, oblasti, oznaci i „čeka mene“; pretraga;
-  izvoz CSV. Prekidač Tabla/Lista pamti izbor na uređaju.
-- **Stavka**: opis, odgovori po vremenu, istorija izmena, dugmad Odgovori,
-  Predloži zatvaranje, Potvrdi zatvaranje i Ponovo otvori.
-- **Nova stavka**: naslov, oblast, oznake, rok (opciono), opis. Na telefonu treba
-  da traje manje od pola minuta.
-- **Prijava**: dugme „Prijavi se preko Google-a“, a ispod njega link na mejl.
-  Nema lozinke.
+- **Sign-in.** Section 5 and decision 3 describe Google sign-in with an e-mail link and no password. The code
+  signs in with e-mail and password, with Google as an option, and has no e-mail link sign-in; the later decision
+  in section 9 matches the code.
+- **PWA.** Sections 2 and 7 plan installing as an app. There is no web app manifest and no service worker.
+- **Export.** Section 6 plans CSV and XLSX export and a weekly export through a GitHub Action. The code exports CSV
+  only, and the only workflow is the GitHub Pages one.
+- **Timetable photo.** Section 5 says the photo goes to the private storage, like the documents. The code keeps it
+  as a data URL in `raspored_casova.slika`.
+- **Schema.** The first draft in section 6 has the tables `oblast` and `izmena`. Neither exists: the areas are a
+  fixed list (a check on `stavka.oblast`, and `src/lib/osnova.ts`), and an edit of an item is a thread entry of
+  kind `izmenjeno` in `unos`.
+- **Hosting.** Section 6 chooses Cloudflare Pages for the owner's copy, so it does not share the `github.io` origin
+  with the owner's other sites; decision 6 in section 9 still says GitHub Pages. The workflow
+  `.github/workflows/pages.yml` falls back to the owner's Supabase project when it runs in the owner's repository,
+  and the README links the demo on GitHub Pages. See [architecture/overview.md](architecture/overview.md#open).
+- **The child's name.** Section 4 greets with the child's name. The decision in section 9 removed the name
+  everywhere, and the code follows the decision.
+- **Activities.** Section 6 lists "Later: `dogadjaj` (appointments)". Activities are built (table `dogadjaj`).
+- **Deleting documents for good.** Section 6 first plans deletion after 30 days by an Edge Function, then
+  describes deletion when both parents agree. The code does the second.
 
-## 6. Podaci i tehnika (preporuka)
+## Where the plan text lives
 
-**Baza: Supabase (Postgres) u EU regionu (Frankfurt), besplatni plan.**
-
-- **Prijava** (2026-11-04): preko Google-a ili mejlom i lozinkom (bar
-  10 znakova, slova i brojevi; mejl se potvrđuje linkom; postoji „zaboravljena
-  lozinka“). Korisničko ime je mejl. Posebno korisničko ime nije uvedeno: bez
-  mejla nema vraćanja lozinke, a prijava korisničkim imenom traži da se negde
-  otkriva kom mejlu ono pripada.
-- **MFA**: kod iz aplikacije (TOTP: Google Authenticator, Authy, 1Password).
-  Uključuje se u podešavanjima ili pri prvom ulasku (preporučeno, ne obavezno).
-  Kad je uključen, i baza traži drugi korak: restriktivna RLS politika pušta
-  podatke tek na nivou `aal2`.
-- **Porodični prostor i pozivnica** umesto liste od dve dozvoljene adrese:
-  - prvi roditelj pravi prostor (ime deteta, tata ili mama) i dobija link za
-    poziv, koji šalje Viberom, WhatsApp-om, mejlom ili kopiranjem;
-  - link važi 7 dana i koristi se jednom; po želji je vezan za jedan mejl. U
-    bazi se čuva samo SHA-256 otisak tokena, a novi link poništava stari;
-  - drugi roditelj otvara link i vidi „Tata te poziva u zajednički prostor za vaše dete“,
-    pravi nalog ili se prijavljuje, pa prihvata;
-  - u prostoru mogu biti samo dvoje, a jedan nalog je u samo jednom prostoru;
-  - registracija je otvorena, ali bez prostora nalog ne vidi ništa. Time
-    aplikacija može da služi i drugim porodicama, svaka u svom prostoru.
-- Tabele `porodica`, `roditelj`, `dete` i `pozivnica` nemaju politike za upis;
-  sve ide kroz funkcije u bazi (`kreiraj_porodicu`, `napravi_pozivnicu`,
-  `pogledaj_pozivnicu`, `prihvati_pozivnicu`, `oznaci_posetu`), koje proveravaju
-  ko pita. Testovi: `supabase/tests/porodica.test.sql` (24 provere).
-- **Google** je podešen u `supabase/config.toml`, ali isključen dok vlasnik ne
-  napravi OAuth klijent u Google Cloud Console (uputstvo u README).
-- Row Level Security: sve je zabranjeno osim za ta dva naloga.
-- Istoriju izmena puni okidač u bazi, tako da ne zavisi od aplikacije.
-- Besplatan projekat se pauzira posle nedelju dana bez aktivnosti. Nedeljni
-  automatski izvoz (dole) ga drži aktivnim.
-
-**Frontend: Astro + TypeScript**, kao sajt. CSS tokeni se kopiraju sa sajta.
-Pregledač razgovara sa bazom direktno preko `supabase-js`, pa nema posebnog servera.
-
-**Nema sopstvenog backenda.** Ulogu backenda ima Supabase:
-
-- pravila pristupa: RLS politike;
-- poslovna pravila: ograničenja i okidači u bazi (prelazi stanja, istorija,
-  potvrda zatvaranja);
-- obaveštenja u F2: Supabase Edge Function. I ona radi kod Supabase-a, pa ni tada
-  ne pokrećemo svoj server.
-
-Sva logika je u SQL migracijama u repou (`supabase/migrations`).
-
-**Hosting: Cloudflare Pages** (2026-11-04; ranije GitHub Pages), adresa
-`<ime>.pages.dev`. Razlog: na `manse404.github.io` svi GitHub Pages sajtovi
-vlasnika dele isto poreklo (origin), pa bi svaki od njih mogao da pročita
-prijavu sačuvanu u pregledaču; aplikacija sa zdravstvenim podacima i
-dokumentima dobija svoju adresu. Build: `npm run build`, izlaz `dist`, Node iz
-`.node-version`. GitHub Pages workflow (`.github/workflows/pages.yml`) ostaje
-za forkove i uključuje se promenljivom `OBJAVI_PAGES=da` (GitHub ne dozvoljava imena koja počinju sa `GITHUB_`).
-
-**Otvoren kod, privatna kopija** (2026-11-04): repo je javan pod MIT
-licencom, da svako može da podigne svoju kopiju (uputstvo u README). Kopija
-vlasnika je samo za njegovu porodicu: tabela `dozvoljeni_osnivac` (migracija
-`20261104060000_ko_otvara_prostor.sql`) dozvoljava otvaranje prostora samo
-upisanim mejlovima; prazna tabela znači da svako može, pa tuđe kopije rade bez
-podešavanja. Drugi roditelj uvek ulazi preko poziva. Ko ne sme da otvori
-prostor, na dobrodošlici vidi objašnjenje i link ka repou.
-
-- Sama stranica je javna na oba hostinga. Podatke štite prijava i RLS u bazi,
-  a ne skrivena adresa.
-- **GitHub Pages** je besplatan samo iz javnog repoa. Tada izvorni kod mora biti
-  bez ličnih podataka. Pre objave:
-  - demo podaci (`src/lib/mock/seed.ts`) dobijaju neutralno ime deteta;
-  - ovaj plan se čisti od imena ili seli van repoa;
-  - pravo ime i nazivi oblasti stoje samo u bazi, a aplikacija ih tako već i čita.
-- **Cloudflare** (Workers static assets ili Pages) radi iz privatnog repoa, pa
-  ovakvo čišćenje nije potrebno. Takođe je besplatan.
-
-**Kako se GitHub Pages povezuje sa Supabase-om.** GitHub Pages servira samo
-fajlove. Aplikacija se učita u pregledač i odatle preko `supabase-js` razgovara
-direktno sa Supabase-om preko HTTPS-a. Server između njih ne postoji. Pri
-objavi treba:
-
-- u Supabase-u (Auth → URL Configuration) za Site URL i Redirect URLs upisati
-  `https://manse404.github.io/co-parenting-app/`, i lokalnu adresu za razvoj;
-- u Google OAuth klijentu kao redirect URI upisati Supabase callback adresu
-  (`https://<projekat>.supabase.co/auth/v1/callback`);
-- Supabase URL i publishable ključ upisati u GitHub Actions varijable, iz kojih
-  ulaze u build. Ti podaci su javni po dizajnu, jer ih vidi svaki pregledač.
-  Supabase dokumentacija to izričito dozvoljava, pošto podatke štiti RLS;
-- deploy preko GitHub Actions, isto kao za sajt.
-
-Napomena: aplikacija deli domen `manse404.github.io` sa sajtom, pa sesija
-prijave u pregledaču pripada istom domenu. To je u redu dok sajt nema skripte
-trećih strana; danas ih nema. Ako ih ikad dobije, aplikacija prelazi na sopstveni
-poddomen.
-
-**Šta treba (sve besplatno):**
-
-| Šta | Ko | Napomena |
+| Section | Topic | Now in |
 |---|---|---|
-| Supabase nalog i projekat, region Frankfurt | vlasnik pravi | |
-| Google Cloud projekat sa OAuth klijentom | vlasnik pravi | samo za „Login with Google“; osnovni podaci (mejl, ime) ne traže verifikaciju od Google-a |
-| Cloudflare nalog povezan sa GitHub-om | vlasnik | |
-| Privatni GitHub repo | vlasnik | |
-| Node 20+, Supabase CLI, Docker | lokalno | lokalna baza za razvoj i migracije |
-| Domen | ne treba za v1 | adresa `*.workers.dev` / `*.pages.dev` je dovoljna; u F2 može zatrebati za slanje mejlova |
+| 1, 2 | What we are building, Principles | [product/vision.md](product/vision.md#original-plan-text) |
+| 3 | Terms | [product/glossary.md](product/glossary.md#original-plan-text) |
+| 4, 5 | Home, Screens | [design/screens.md](design/screens.md#original-plan-text) |
+| 6 to 9 | Data and technology, Phases, Tests, Decisions | [below](#original-plan-text) |
 
-**„Sheet“:** dugme Izvezi (CSV/XLSX) na listi i nedeljni automatski izvoz preko
-GitHub Action-a. Taj izvoz je ujedno i rezervna kopija.
+## Open
 
-Šema, prvi nacrt:
+- Whether to build the PWA and the automatic export, or drop them from the plan.
+- Which host serves the owner's copy (above).
+
+## Original plan text
+
+Sections 6 to 9 of the original plan, translated from Serbian. Name: `co-parenting-app`; the decisions are in
+section 9. A date in brackets is the day a decision was added to the plan. Where the plan and the code differ, the
+code is right; the differences are listed [above](#where-the-plan-and-the-code-differ).
+
+### 6. Data and technology (recommendation)
+
+**Database: Supabase (Postgres) in the EU region (Frankfurt), free plan.**
+
+- **Sign-in** (2026-11-04): with Google, or with e-mail and password (at least 10 characters, letters and digits;
+  the e-mail is confirmed by a link; there is a "forgotten password" flow). The username is the e-mail. A separate
+  username was not introduced: without an e-mail there is no password reset, and signing in with a username would
+  mean revealing somewhere which e-mail it belongs to.
+- **MFA**: a code from an authenticator app (TOTP: Google Authenticator, Authy, 1Password). It is turned on in the
+  settings or at the first sign-in (recommended, not required). When it is on, the database also requires the
+  second step: a restrictive RLS policy lets data through only at level `aal2`.
+- **A family space and an invitation** instead of a list of two allowed addresses:
+  - the first parent creates the space (the child's name, dad or mum) and gets an invitation link, which they send
+    by Viber, WhatsApp or e-mail, or by copying it;
+  - the link is valid for 7 days and is used once; optionally it is bound to one e-mail. The database stores only
+    the SHA-256 fingerprint of the token, and a new link cancels the old one;
+  - the second parent opens the link and sees "Dad invites you to a shared space for your child", creates an
+    account or signs in, then accepts;
+  - a space can hold only two people, and one account is in only one space;
+  - signing up is open, but without a space an account sees nothing. This way the app can also serve other
+    families, each in its own space.
+- The tables `porodica`, `roditelj`, `dete` and `pozivnica` have no write policies; everything goes through
+  database functions (`kreiraj_porodicu`, `napravi_pozivnicu`, `pogledaj_pozivnicu`, `prihvati_pozivnicu`,
+  `oznaci_posetu`), which check who is asking. Tests: `supabase/tests/porodica.test.sql` (24 checks).
+- **Google** is set up in `supabase/config.toml`, but stays off until the owner creates an OAuth client in the
+  Google Cloud Console (instructions in the README).
+- Row Level Security: everything is forbidden except for those two accounts.
+- The change history is filled by a trigger in the database, so it does not depend on the app.
+- A free project is paused after a week without activity. The weekly automatic export (below) keeps it active.
+
+**Frontend: Astro + TypeScript**, like the website. The CSS tokens are copied from the website. The browser talks
+to the database directly through `supabase-js`, so there is no separate server.
+
+**No backend of our own.** Supabase plays the part of the backend:
+
+- access rules: RLS policies;
+- business rules: constraints and triggers in the database (state transitions, history, confirmation of closing);
+- notifications in F2: a Supabase Edge Function. It also runs at Supabase, so even then we run no server of our
+  own.
+
+All the logic is in SQL migrations in the repository (`supabase/migrations`).
+
+**Hosting: Cloudflare Pages** (2026-11-04; GitHub Pages before that), at the address `<name>.pages.dev`. The
+reason: on `manse404.github.io` all of the owner's GitHub Pages sites share the same origin, so any of them could
+read the sign-in kept in the browser; an app with health data and documents gets an address of its own. Build:
+`npm run build`, output `dist`, Node from `.node-version`. The GitHub Pages workflow (`.github/workflows/pages.yml`)
+stays for forks and is turned on with the variable `OBJAVI_PAGES=da` (GitHub does not allow names that start with
+`GITHUB_`).
+
+**Open code, private copy** (2026-11-04): the repository is public under the MIT licence, so that anyone can set up
+their own copy (instructions in the README). The owner's copy is only for his family: the table
+`dozvoljeni_osnivac` (migration `20261104060000_ko_otvara_prostor.sql`) lets only the listed e-mails open a space;
+an empty table means anyone may, so other people's copies work without any setup. The second parent always comes
+in through the invitation. Someone who may not open a space sees an explanation on the welcome screen and a link to
+the repository.
+
+- The page itself is public on both hosts. The data is protected by the sign-in and by RLS in the database, not by
+  a hidden address.
+- **GitHub Pages** is free only from a public repository. Then the source code must hold no personal data. Before
+  publishing:
+  - the demo data (`src/lib/mock/seed.ts`) gets a neutral name for the child;
+  - this plan is cleaned of names or moved out of the repository;
+  - the real name and the names of the areas live only in the database, and the app already reads them from
+    there.
+- **Cloudflare** (Workers static assets or Pages) works from a private repository, so no such cleaning is needed.
+  It is also free.
+
+**How GitHub Pages connects to Supabase.** GitHub Pages serves only files. The app loads in the browser and from
+there talks to Supabase directly over HTTPS, through `supabase-js`. There is no server between them. When
+publishing:
+
+- in Supabase (Auth → URL Configuration), set the Site URL and the Redirect URLs to
+  `https://manse404.github.io/co-parenting-app/`, plus the local address for development;
+- in the Google OAuth client, set the Supabase callback address as the redirect URI
+  (`https://<project>.supabase.co/auth/v1/callback`);
+- put the Supabase URL and the publishable key into GitHub Actions variables, from which they go into the build.
+  These values are public by design, because every browser sees them. The Supabase documentation explicitly allows
+  this, since RLS protects the data;
+- deploy through GitHub Actions, the same as the website.
+
+Note: the app shares the domain `manse404.github.io` with the website, so the sign-in session in the browser
+belongs to the same domain. That is fine as long as the website has no third-party scripts. If it ever gets them,
+the app moves to a subdomain of its own.
+
+**What is needed (all free):**
+
+| What | Who | Note |
+|---|---|---|
+| A Supabase account and project, region Frankfurt | the owner creates it | |
+| A Google Cloud project with an OAuth client | the owner creates it | only for "Login with Google"; the basic data (e-mail, name) needs no verification by Google |
+| A Cloudflare account linked to GitHub | the owner | |
+| A private GitHub repository | the owner | |
+| Node 20+, Supabase CLI, Docker | locally | a local database for development and migrations |
+| A domain | not needed for v1 | the address `*.workers.dev` / `*.pages.dev` is enough; in F2 one may be needed for sending e-mail |
+
+**"Sheet":** an "Izvezi" (export) button (CSV/XLSX) on the list, and a weekly automatic export through a GitHub
+Action. That export is also the backup.
+
+Schema, first draft:
 
 ```
-roditelj   id (auth korisnik), oznaka ('Tata' | 'Mama' ili ime),
+roditelj   id (auth user), oznaka ('Tata' | 'Mama' or a name),
            oznaka_akuzativ ('tatu' | 'mamu'), mejl, poslednja_poseta
 dete       ime
-oblast     kljuc, naziv, redosled   (naziv „Detetove potrebe“ živi samo ovde)
+oblast     kljuc, naziv, redosled   (the name "Detetove potrebe" lives only here)
 stavka     id, naslov, opis, oblast, stanje, vazno, hitno, datum,
            otvorio, odluka, zatvaranje_predlozio,
            kreirano, izmenjeno, zatvoreno
@@ -359,17 +186,17 @@ unos       id, stavka_id, autor, vrsta, tekst, kreirano
 izmena     id, tabela, red_id, autor, staro (jsonb), novo (jsonb), vreme
 ```
 
-Ko čeka koga ne čuva se posebno: izračunava se iz stanja, polja `otvorio` i
-predloga zatvaranja (`src/lib/domen.ts`). Isto važi za automatsko Hitno.
-`datum` je jedan datum, bilo da je rok ili termin.
+Who waits for whom is not stored separately: it is computed from the state, the field `otvorio` and the closing
+proposal (`src/lib/domen.ts`). The same holds for the automatic urgent flag. `datum` is a single date, whether it
+is a deadline or an appointment.
 
-Kalendar:
+Calendar:
 
 ```
 boravak            id, vrsta (redovno | izuzetak), kod (roditelj), od, do,
-                   napomena, kreirano          — vreme je lokalno, bez zone
+                   napomena, kreirano          — local time, no time zone
 zahtev_kalendara   id, vrsta (dodaj | izmeni | obrisi), boravak_id,
-                   boravci (jsonb: novi boravci), poruka, predlozio,
+                   boravci (jsonb: the new stays), poruka, predlozio,
                    stanje (ceka | prihvacen | odbijen | povucen), razlog,
                    kreirano, reseno, resio
 ```
@@ -380,47 +207,42 @@ dogadjaj           id, naziv, vrsta, datum, ceo_dan, od, do,
                    vodi, mesto, napomena, kreirano
 ```
 
-`zahtev_kalendara` dobija `predmet` (boravak | dogadjaj), `dogadjaj_id`,
-`dogadjaj` (jsonb) i `jednom` (datum pojave koja se pomera samo jednom).
+`zahtev_kalendara` gets `predmet` (boravak | dogadjaj), `dogadjaj_id`, `dogadjaj` (jsonb) and `jednom` (the date
+of the occurrence that moves just once).
 
-Pravilo „niko sam“ sprovodi baza, ne samo aplikacija:
+The "nobody alone" rule is enforced by the database, not only by the app:
 
-- `boravak` i `dogadjaj` nemaju politiku za INSERT, UPDATE i DELETE ni za
-  jednog korisnika;
-- roditelj sme samo da upiše `zahtev_kalendara` sa `predlozio = auth.uid()` i
-  `stanje = 'ceka'`;
-- jedina vrata ka tabeli `boravak` su funkcija `prihvati_zahtev(id)`
-  (security definer). Ona proverava da prihvata drugi roditelj, ponovo proverava
-  preklapanja i primenjuje izmenu u jednoj transakciji. `odbij_zahtev` i
-  `povuci_zahtev` rade isto za svoje slučajeve.
+- `boravak` and `dogadjaj` have no INSERT, UPDATE or DELETE policy for any user;
+- a parent may only insert a `zahtev_kalendara` with `predlozio = auth.uid()` and `stanje = 'ceka'`;
+- the only door to the table `boravak` is the function `prihvati_zahtev(id)` (security definer). It checks that
+  the other parent is the one accepting, checks overlaps again and applies the change in one transaction.
+  `odbij_zahtev` and `povuci_zahtev` do the same for their cases.
 
-Pravila su ista kao u `src/lib/kalendar.ts` i `src/lib/dogadjaji.ts`, sa
-testovima u `kalendar.test.ts` i `dogadjaji.test.ts`.
+The rules are the same as in `src/lib/kalendar.ts` and `src/lib/dogadjaji.ts`, with tests in `kalendar.test.ts`
+and `dogadjaji.test.ts`.
 
-Karton:
+Record:
 
 ```
-karton_unos        id, grupa, naziv, vrednost, detalji (jsonb, za spiskove),
+karton_unos        id, grupa, naziv, vrednost, detalji (jsonb, for lists),
                    izmenio, izmenjeno
-                   grupe: osnovno, zdravlje, skola, nastavnici, mere,
-                          kontakti, drugari, aktivnosti
-raspored_casova    casovi (text[]), tabela (jsonb), slika (putanja u
-                   skladištu), napomena, izmenio, izmenjeno
+                   groups: osnovno, zdravlje, skola, nastavnici, mere,
+                           kontakti, drugari, aktivnosti
+raspored_casova    casovi (text[]), tabela (jsonb), slika (a path in
+                   storage), napomena, izmenio, izmenjeno
 karton_izmena      id, unos_id, grupa, naziv, staro, novo, autor, kada
-                   — puni je okidač u bazi, ne aplikacija
+                   — filled by a trigger in the database, not by the app
 ```
 
-**Dokumenti (urađeno 2026-11-04, migracija `20261104020000_dokumenti.sql`).**
-Prvi deo aplikacije koji u režimu sa bazom zaista deli podatke između vas dvoje:
+**Documents (migration `20261104020000_dokumenti.sql`).** The first part of the app that, in database mode, really
+shares data between the two of you:
 
-- Supabase Storage, **privatna** kanta `dokumenti`, fajl pod
-  `<porodica>/<dokument>.<ext>`. Javnih linkova nema; slika ili PDF se otvara
-  potpisanim linkom koji važi 10 minuta.
-- Pravila na kanti: čitaju i otpremaju samo dva roditelja te porodice (uz MFA,
-  kao svuda). Kanta nema pravilo za izmenu ni brisanje, pa **otpremljen fajl
-  niko ne može da zameni ni uništi**. Kanta prima samo PDF, JPG, PNG i WebP,
-  najviše 10 MB.
-- Tabele:
+- Supabase Storage, a **private** bucket `dokumenti`, each file under `<porodica>/<dokument>.<ext>`. There are no
+  public links; a picture or a PDF opens through a signed link valid for 10 minutes.
+- Rules on the bucket: only the two parents of that family read and upload (with MFA, as everywhere). The bucket
+  has no rule for updating or deleting, so **nobody can replace or destroy an uploaded file**. The bucket accepts
+  only PDF, JPG, PNG and WebP, 10 MB at most.
+- Tables:
 
   ```
   dokument        id, porodica_id, putanja, naziv, kategorija, datum,
@@ -430,191 +252,107 @@ Prvi deo aplikacije koji u režimu sa bazom zaista deli podatke između vas dvoj
                   vracen), ko, kada
   ```
 
-  U tabele se ne piše direktno, samo kroz funkcije `dodaj_dokument`,
-  `izmeni_dokument`, `obrisi_dokument` i `vrati_dokument`. Tip i veličinu
-  `dodaj_dokument` uzima iz samog otpremljenog fajla, ne od aplikacije.
-- Brisanje je „meko“: označi dokument, zapiše ko i kada, a svako od vas ga
-  vraća. Vremenskog ograničenja za vraćanje za sada nema; trajno brisanje
-  (posle 30 dana, uz Edge Function koja briše i fajl) ostaje za kasnije.
-- Slike se pre slanja smanjuju u pregledaču (duža ivica do 2400 px, JPEG) kad su
-  veće od 1,5 MB. HEIC sa iPhone-a se pretvara u JPEG gde pregledač ume da ga
-  otvori; Safari na iPhone-u ionako šalje JPEG.
-- U demo režimu dokumenti stoje u IndexedDB-u pregledača, sa četiri primera
-  nacrtana u pregledaču (nema pravih skenova u repou).
-- **Trajno brisanje** (2026-11-04; migracija
-  `20261104030000_trajno_brisanje.sql`): samo iz „Obrisani“ i samo kad se oba
-  roditelja slože. Jedan predloži, drugi potvrdi ili odbije; predlagač ne može
-  sam sebi da potvrdi i može da povuče predlog. Vraćanje dokumenta odgovara na
-  otvoren predlog (predlagač ga time povlači, drugi odbija); posle potvrde
-  vraćanja nema. Tek tada kanta dozvoljava brisanje fajla (pravilo za DELETE
-  traži odobren predlog), aplikacija ga briše preko Storage API-ja, a
-  `zavrsi_trajno_brisanje` uklanja red tek kad fajla stvarno nema (može da se
-  ponovi ako veza pukne). Ostaje zapis u `dokument_brisanje`: naziv, ko je
-  predložio, ko je potvrdio, kada. Predlog koji čeka tebe stoji i na početnoj
-  pod „Na tebi je“. Porodica sa jednim roditeljem ne može trajno da briše.
-- Za kasnije: veza dokumenta sa stavkom (npr. nalaz uz „Kontrola kod
-  alergologa“) i sa kartonom. Čeka da i stavke pređu u bazu, inače bi veza
-  pokazivala na podatke koji postoje samo na jednom uređaju.
+  Nothing is written to the tables directly, only through the functions `dodaj_dokument`, `izmeni_dokument`,
+  `obrisi_dokument` and `vrati_dokument`. `dodaj_dokument` takes the type and the size from the uploaded file
+  itself, not from the app.
+- Deleting is "soft": it marks the document and writes down who and when, and either of you restores it. For now
+  there is no time limit on restoring; deleting for good (after 30 days, with an Edge Function that also removes
+  the file) is left for later.
+- Pictures larger than 1.5 MB are shrunk in the browser before upload (the longer edge to at most 2400 px, JPEG).
+  HEIC from an iPhone is turned into JPEG where the browser can open it; Safari on an iPhone sends JPEG anyway.
+- In demo mode the documents live in the browser's IndexedDB, with four examples drawn in the browser (there are no
+  real scans in the repository).
+- **Deleting for good** (2026-11-04; migration `20261104030000_trajno_brisanje.sql`): only from "Obrisani" (the
+  trash) and only when both parents agree. One proposes, the other confirms or declines; the proposer cannot
+  confirm their own proposal and can withdraw it. Restoring the document answers an open proposal (for the
+  proposer it withdraws it, for the other parent it declines it); after confirmation there is no way back. Only
+  then does the bucket allow the file to be removed (the DELETE rule requires an approved proposal), the app
+  removes it through the Storage API, and `zavrsi_trajno_brisanje` removes the row only once the file is really
+  gone (it can be repeated if the connection drops). A record stays in `dokument_brisanje`: the name, who
+  proposed, who confirmed, when. A proposal that waits for you also shows on the home screen under "Na tebi je"
+  (your turn). A family with one parent cannot delete for good.
+- For later: linking a document to an item (for example a medical finding to the item "Allergist check-up") and to
+  the record. It waits until the items move to the database as well; otherwise the link would point to data that
+  exists on one device only.
 
-Kasnije: `dogadjaj` (termini), `trosak`.
+Later: `dogadjaj` (appointments), `trosak` (expenses).
 
-**Alternativa: Google Sheet + Apps Script.** Prednost je što se tabela otvara
-direktno. Nedostaci: izmene u tabeli zaobilaze pravila aplikacije (stanja,
-istoriju, potvrdu zatvaranja), aplikacija je sporija i teško ju je urediti tako
-da liči na sajt. Zato je preporuka Supabase, uz izvoz u tabelu.
+**Alternative: Google Sheet + Apps Script.** The advantage is that the sheet opens directly. The disadvantages:
+edits in the sheet bypass the app's rules (states, history, confirmation of closing), the app is slower, and it is
+hard to make it look like the website. That is why the recommendation is Supabase, with an export to a sheet.
 
-## 7. Faze
+### 7. Phases
 
-**Status 2026-11-04 (veče):** ekrani iz F1 rade (demo u pregledaču, sa nalozima u bazi):
-početna (nov raspored, Hitno na vrhu), tabla sa prevlačenjem, lista sa filterima
-i izvozom CSV, stavka sa tokom i svim prelazima, nova stavka, kalendar boravka
-sa aktivnostima, prikazima Dan/Nedelja/Mesec/Raspored i prevlačenjem (sve
-kao predlozi koje drugi roditelj prihvata), karton (aktivnosti i kontakti kao
-spiskovi) i istorija dogovora kod stavki. Dokumenti imaju svoju stranu i čekaju
-bazu.
+The status of each phase is in [Phases](#phases) above.
 
-**Dokumenti urađeni (2026-11-04):** u bazi i u demou; vidi odeljak 6.
+- **F0, setup:** an Astro project with the website's tokens, the Supabase project, schema, RLS, the history
+  trigger, two accounts, Cloudflare Pages.
+- **F1, MVP:** home, list, item, new item, state transitions, "Predstojeće" (upcoming), "Novo od poslednje posete"
+  (new since the last visit), PWA, CSV export.
+- **F2:** e-mail notifications (urgent ones at once, the rest once a day), Realtime, privacy and deletion;
+  documents (section 6).
+- **F3 (optional):** expenses.
 
-**F0, deo 1 urađen (2026-11-04):** lokalni Supabase (`npm run baza`), prijava,
-MFA, porodični prostor i pozivnica, sa testovima u bazi i u pregledaču
-(`npm run test:baza`, `npm run smoke:nalog`).
+Note: without notifications an app like this is easily forgotten. If after F1 it turns out that the other parent
+does not open it regularly, notifications come next.
 
-**F0, deo 2 urađen (2026-11-04):** stavke, kalendar i karton su u bazi
-(migracija `20261104050000_stavke_kalendar_karton.sql`), pa sa nalozima oba
-roditelja vide iste podatke. Pravila su u bazi, ista kao u aplikaciji: zatvaranje
-stavke potvrđuje drugi roditelj; kalendar (boravci i aktivnosti) se menja samo
-kroz predlog koji prihvata drugi roditelj, uz ponovnu proveru preklapanja;
-karton beleži svaku izmenu okidačem (staro, novo, ko). Tabele nemaju pravila za
-pisanje, samo funkcije. Aplikacija čita preko `src/lib/izvor-supabase.ts`; bez
-naloga (demo) i dalje radi na probnim podacima u pregledaču. Traka „probni
-podaci“ je uklonjena. Nov porodični prostor počinje prazan.
+### 8. Tests
 
-Otvoreno posle F0: Supabase vraća najviše 1000 redova po tabeli (`max_rows`),
-što je dovoljno za godine rada, ali boravke treba jednom ograničiti na period.
-(Realtime i obaveštenja su urađeni u F2, dole.)
+- RLS: a third account and a signed-out user see nothing.
+- Board: dragging with the mouse and with a finger (press and hold, then drag); a quick swipe of the finger does
+  not move the card; a forbidden move changes nothing (`npm run smoke`).
+- State transitions: the other parent's reply moves the item to open; closing without a decision is refused; the
+  confirmation of closing must come from the other parent.
+- History: every edit has an author and a time.
+- Record: an edit remembers the old and the new value, the same value is not logged, deleting leaves a trace;
+  activities and contacts take any number of entries; an open draft locks the rest. The history of agreements
+  holds only closed items.
+- Calendar: a proposal does not change the calendar; the proposer cannot accept their own request; accepting
+  checks overlaps again; repetition does not "slide" across the change between summer and winter time; the
+  occurrences of activities (weekly, every other week, until a date, skipped days); the layout of overlapping
+  blocks; moving just once and every time; a moved handover as a one-off change; after a drag exactly one dialog
+  opens, in the middle; in the database: a user cannot write directly to `boravak` and `dogadjaj` (the RLS test in
+  F0).
+- Notifications (`supabase/tests/obavestenja.test.sql`, 37 checks): only the other parent gets a row; an item
+  flagged "Hitno" (urgent) and a proposal within 48 h are urgent; record changes go without values; a parent sees
+  only their own rows, another family nothing, and nobody writes directly; `nikad` schedules nothing and drops what
+  was waiting; the queue for sending is read only by the service role, `odmah` and `dnevno` return the right sets,
+  what was sent is not repeated, and what failed is tried again. The Edge Function was run through Node with a fake
+  `fetch` (401 without the key, grouping by recipient, subjects, a Resend error goes into `oznaci_poslato`). The
+  screen refresh (`src/lib/osvezavanje.test.ts`): one refresh per burst of signals, no overlap, stopping
+  unsubscribes.
+- Deleting a space (`supabase/tests/brisanje_porodice.test.sql`, 21 checks): the first request waits and can be
+  withdrawn, the second approves it, a file is deleted only then and only from its own family, and then every row;
+  another family stays; an account is deleted only once it is out of a space; a parent who is alone deletes at
+  once.
+- Documents (`supabase/tests/dokumenti.test.sql`, 30 checks): uploads only into the folder of one's own family; a
+  description only for a file that exists, with the type and the size taken from the file; the other parent sees
+  and opens, a stranger and a signed-out user do not; a file does not change and is not deleted; deleting marks it
+  and writes down who, restoring works, the trail logs everything; with MFA on but without the code there is
+  neither reading nor uploading. In the browser (`npm run smoke:nalog`): dad adds, mum sees the thumbnail and opens
+  it through the signed link and deletes it, and dad restores it.
 
-**F2 urađen (2026-11-11):** obaveštenja mejlom, Realtime, privatnost i brisanje.
+### 9. Decisions
 
-- **Pravila obaveštenja su u bazi** (`20261111010000_obavestenja.sql`):
-  okidači stavljaju red u `obavestenje` za drugog roditelja za novu stavku i
-  svaki unos u toku (odgovor, predlog i potvrda zatvaranja, odbijanje, izmena,
-  ponovno otvaranje), predlog za kalendar i odgovor na njega, nov dokument i
-  promenu kartona (samo naziv polja, nikad vrednost: to mogu biti zdravstveni
-  podaci). Hitno = oznaka Hitno ili predlog za naredna 48 h. Svaki roditelj
-  bira `odmah` / `dnevno` (podrazumevano) / `nikad` u Podešavanjima
-  (`postavi_obavestenja`); uz `nikad` se ništa ne zakazuje, a što je čekalo
-  se briše. Red čita i označava samo service role (`obavestenja_za_slanje`,
-  `oznaci_poslato`); roditelj vidi samo svoje redove. Test:
-  `supabase/tests/obavestenja.test.sql` (37 provera).
-- **Slanje**: Edge Function `supabase/functions/obavestenja` (Deno, bez
-  npm SDK-a), `?rezim=odmah|dnevno`, prima samo `service_role` ključ, jedan
-  mejl po primaocu preko Resend HTTP API-ja (hitno u naslovu, dnevni pregled
-  nabraja sve, linkovi na `APP_URL`), pa `oznaci_poslato`; neuspelo ostaje u
-  redu sa greškom i ponavlja se do 7 dana. Rasporedi
-  (`20261111020000_obavestenja_raspored.sql`): pg_cron na 5 minuta za
-  `odmah` i u 06:00 i 07:00 UTC za `dnevno` (funkcija `pozovi_obavestenja`
-  šalje samo kad je u Beogradu 8 h), kroz pg_net; adresa funkcije i ključ se
-  čitaju iz Vault-a; rasporedi se prave samo gde pg_cron i pg_net postoje, pa
-  lokalno i u testovima migracija prolazi bez njih.
-- **Realtime** (`20261111030000_realtime.sql`): deljene tabele su u
-  publikaciji `supabase_realtime`; aplikacija drži jedan kanal po porodici
-  (`izvor-supabase.ts`, `Izvor.naPromenu`), a ekrani sa deljenim podacima se
-  ponovo učitavaju 500 ms posle poslednje promene (`src/lib/osvezavanje.ts`,
-  Vitest). Šta kome stiže odlučuje RLS: Realtime proverava select politike
-  tabele sa JWT-om pretplatnika. Lokalni `npm run baza` ne diže realtime
-  servis, pa je to provereno čitanjem politika i testovima RLS-a, ne uživo;
-  prva prava provera je sa dva naloga na hostovanom projektu.
-- **Privatnost i brisanje** (`20261111040000_brisanje_porodice.sql`): strana
-  `/privatnost/` (link sa prijave i iz podešavanja); `obrisi_porodicu()` briše
-  sve tek kad oba roditelja zatraže (prvi može da odustane dok drugi ne
-  zatraži; fajlovi idu kroz Storage API uz politiku kante, pa svi redovi);
-  `obrisi_nalog()` briše sopstveni nalog kad je roditelj van prostora.
-  Test: `supabase/tests/brisanje_porodice.test.sql` (21 provera).
+**The child's name is not shown** (2026-11-04): everywhere it says "dete" (the child): "Detetove potrebe" (the
+child's needs), "Kod koga je dete" (who the child is with), "Karton deteta" (the child's record). The welcome
+screen no longer asks for the name; the database still has the field `dete.ime` and stores "Dete" in it. The name
+can be written down only as a fact in the record ("Puno ime", full name), if the parents add it themselves.
 
-Vlasnik još treba da (uputstvo u `supabase/functions/obavestenja/README.md`):
-napravi Resend nalog i potvrdi domen; upiše tajne `RESEND_API_KEY`,
-`OBAVESTENJA_FROM`, `APP_URL` (`npx supabase secrets set`); objavi funkciju
-(`npx supabase functions deploy obavestenja`); u hostovanom projektu uključi
-`pg_cron` i `pg_net` i upiše `obavestenja_url` i `obavestenja_kljuc` u Vault.
-Dok to ne uradi, red se puni, a mejlovi ne idu (stariji od 7 dana se
-preskaču).
+Decided on 2026-11-03:
 
-- **F0, postavka:** Astro projekat sa tokenima sa sajta, Supabase projekat,
-  šema, RLS, okidač istorije, dva naloga, Cloudflare Pages.
-- **F1, MVP:** početna, lista, stavka, nova stavka, prelazi stanja,
-  Predstojeće, Novo od poslednje posete, PWA, izvoz CSV.
-- **F2 (urađeno 2026-11-11):** obaveštenja mejlom (Hitno odmah, ostalo jednom
-  dnevno), Realtime, privatnost i brisanje; dokumenti (odeljak 6, urađeni
-  2026-11-04).
-- **F3 (opciono):** troškovi.
+1. The states unanswered / open / closed mean what section 3 says.
+2. One parent proposes closing, and the other confirms it.
+3. The database is Supabase. Sign-in with a Google account, with an e-mail link as a fallback.
+4. Additions: 1–3 in v1, 4 in v2, and 5–6 only if both parents want them.
+5. The labels in the app are "Tata" (dad) and "Mama" (mum). That is a field in the database and easy to change.
+6. Hosting is GitHub Pages (section 6). The repository becomes public only after it is cleaned of personal data.
 
-Napomena: bez obaveštenja se ovakva aplikacija lako zaboravi. Ako se posle F1
-pokaže da je drugi roditelj ne otvara redovno, obaveštenja idu odmah.
+Decided later, on 2026-11-04: sign-in (Google, e-mail and password), MFA and joining through an invitation. The
+list of allowed addresses was dropped, so the other parent's e-mail is no longer needed in advance.
 
-## 8. Testovi
+Left open:
 
-- RLS: treći nalog i neprijavljen korisnik ne vide ništa.
-- Tabla: prevlačenje mišem i prstom (zadrži pa prevuci), brz pokret prstom ne
-  pomera karticu, zabranjen potez ne menja ništa (`npm run smoke`).
-- Prelazi stanja: odgovor drugog roditelja prebacuje stavku u Otvoreno;
-  zatvaranje bez odluke se odbija; potvrda zatvaranja mora doći od drugog roditelja.
-- Istorija: svaka izmena ima autora i vreme.
-- Karton: izmena pamti staru i novu vrednost, ista vrednost se ne beleži,
-  brisanje ostavlja trag; aktivnosti i kontakti primaju neograničeno zapisa;
-  otvoren nacrt zaključava ostalo. Istorija dogovora sadrži samo zatvorene
-  stavke.
-- Kalendar: predlog ne menja kalendar; predlagač ne može da prihvati svoj
-  zahtev; prihvatanje ponovo proverava preklapanja; ponavljanje ne „klizi“
-  preko promene letnjeg/zimskog vremena; pojave aktivnosti (nedeljno, svake
-  druge, do datuma, izuzeti dani); raspored blokova koji se preklapaju;
-  pomeranje samo jednom i svaki put; pomeren prelazak kao jednokratna promena;
-  posle prevlačenja otvara se tačno jedan prozor, na sredini; u bazi: korisnik
-  ne može direktno da piše u `boravak` i `dogadjaj` (test RLS-a u F0).
-- Obaveštenja (`supabase/tests/obavestenja.test.sql`, 37 provera): red dobija
-  samo drugi roditelj; Hitno i predlog u 48 h su hitni; karton bez vrednosti;
-  roditelj vidi samo svoje redove, druga porodica ništa, niko ne piše direktno;
-  `nikad` ništa ne zakazuje i briše što je čekalo; red za slanje čita samo
-  service role, `odmah` i `dnevno` vraćaju prave skupove, poslato se ne
-  ponavlja, neuspelo se pokušava ponovo. Edge Function je prošla kroz Node
-  sa lažnim `fetch`-om (401 bez ključa, grupisanje po primaocu, naslovi,
-  greška Resend-a ide u `oznaci_poslato`). Osvežavanje ekrana
-  (`src/lib/osvezavanje.test.ts`): jedno osvežavanje po nizu signala, bez
-  preklapanja, prekid odjavljuje.
-- Brisanje prostora (`supabase/tests/brisanje_porodice.test.sql`, 21 provera):
-  prvi zahtev čeka i može da se povuče, drugi odobrava, fajl se briše tek
-  tada i samo iz svoje porodice, pa svi redovi; druga porodica ostaje; nalog
-  se briše tek van prostora; sam roditelj briše odmah.
-- Dokumenti (`supabase/tests/dokumenti.test.sql`, 30 provera): otpremanje samo
-  u folder svoje porodice; opis samo za fajl koji postoji, sa tipom i veličinom
-  iz fajla; drugi roditelj vidi i otvara, stranac i neprijavljen ne; fajl se ne
-  menja i ne briše; brisanje označi i zapiše ko, vraćanje radi, trag beleži sve;
-  sa MFA bez koda nema ni čitanja ni otpremanja. U pregledaču
-  (`npm run smoke:nalog`): tata dodaje, mama vidi sličicu i otvara preko
-  potpisanog linka, briše, a tata vraća.
-
-## 9. Odluke
-
-**Ime deteta se ne prikazuje** (2026-11-04): svuda piše „dete“
-(„Detetove potrebe“, „Kod koga je dete“, „Karton deteta“). Dobrodošlica više
-ne pita za ime; baza i dalje ima polje `dete.ime` i upisuje „Dete“. Ime može da
-se upiše samo kao podatak u kartonu („Puno ime“), ako ga roditelji sami dodaju.
-
-
-Doneto 2026-11-03:
-
-1. Stanja Neodgovoreno / Otvoreno / Zatvoreno znače ono što piše u odeljku 3.
-2. Zatvaranje predlaže jedan roditelj, a potvrđuje drugi.
-3. Baza je Supabase. Prijava preko Google naloga, link na mejl kao rezerva.
-4. Dodaci: 1–3 u v1, 4 u v2, a 5–6 tek ako oba roditelja žele.
-5. Oznake u aplikaciji su „Tata“ i „Mama“. To je polje u bazi i lako se menja.
-6. Hosting je GitHub Pages (odeljak 6). Repo postaje javan tek posle čišćenja ličnih podataka.
-
-Doneto kasnije, 2026-11-04: prijava (Google, mejl i lozinka), MFA i povezivanje
-pozivnicom. Lista dozvoljenih adresa je otpala, pa mejl drugog roditelja više
-nije potreban unapred.
-
-Ostaje otvoreno:
-
-- Google OAuth klijent (Google Cloud Console). Pravi ga vlasnik.
-- Google Sheet: Odgovara i Sheet. Ako zatreba tabela za čitanje, kasnije
-  se dodaje jednosmerna kopija Supabase → Sheet. Sheet nikad nije izvor podataka.
+- The Google OAuth client (Google Cloud Console). The owner creates it.
+- Google Sheet: a sheet would do as well. If a sheet for reading is ever needed, a one-way copy Supabase → Sheet is
+  added later. The sheet is never a source of data.
