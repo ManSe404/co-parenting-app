@@ -29,6 +29,12 @@ export interface Izvor {
   /** Saves the school timetable (null removes it); logged like any karton change. */
   sacuvajRasporedCasova(r: UlazRasporeda | null): Promise<void>;
   ponovoOtvori(id: string, razlog: string): Promise<void>;
+  /**
+   * Calls `cb` when shared data changes (the other parent, or another device
+   * of yours); returns the unsubscribe. The demo lives in one browser and
+   * never fires.
+   */
+  naPromenu(cb: () => void): () => void;
 }
 
 let trenutni: Promise<Izvor> | null = null;

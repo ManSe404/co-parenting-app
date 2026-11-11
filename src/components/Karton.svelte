@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { izvor as dajIzvor, type Izvor } from '../lib/izvor';
+  import { pratiPromene } from '../lib/osvezavanje';
   import {
     GRUPE,
     type GrupaKartona,
@@ -41,12 +42,11 @@
     podaci = await iz.ucitaj();
   }
 
-  onMount(async () => {
-    try {
-      await ucitaj();
-    } catch (e) {
-      greska = e instanceof Error ? e.message : String(e);
-    }
+  onMount(() => {
+    ucitaj().catch((e) => (greska = e instanceof Error ? e.message : String(e)));
+    // The other parent's changes show up without a refresh; an open form
+    // keeps what is typed (it is separate state).
+    return pratiPromene(dajIzvor(), () => ucitaj());
   });
 
   function javi(t: string) {

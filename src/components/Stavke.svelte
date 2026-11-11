@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { izvor as dajIzvor, type Izvor } from '../lib/izvor';
+  import { pratiPromene } from '../lib/osvezavanje';
   import { cekaDrugog, jeHitno, jeVazno, kaoDatum, naPotezu, poHitnosti } from '../lib/domen';
   import { brojStavki } from '../lib/format';
   import { preuzmi, uCsv } from '../lib/izvoz';
@@ -49,12 +50,10 @@
     podaci = await iz.ucitaj();
   }
 
-  onMount(async () => {
-    try {
-      await ucitaj();
-    } catch (e) {
-      greska = e instanceof Error ? e.message : String(e);
-    }
+  onMount(() => {
+    ucitaj().catch((e) => (greska = e instanceof Error ? e.message : String(e)));
+    // The other parent's changes show up without a refresh.
+    return pratiPromene(dajIzvor(), () => ucitaj());
   });
 
   // Keep the URL in sync so a filtered view can be bookmarked or shared.

@@ -19,6 +19,7 @@
   import { type DokumentiIzvor, dokumentiIzvor } from '../lib/dokumenti-izvor';
   import { datumSaGodinom, pre } from '../lib/format';
   import { izvor } from '../lib/izvor';
+  import { pratiPromene } from '../lib/osvezavanje';
   import DokumentDodaj from './DokumentDodaj.svelte';
   import DokumentPregled from './DokumentPregled.svelte';
   import Ikona from './Ikona.svelte';
@@ -69,7 +70,7 @@
     }
   }
 
-  onMount(async () => {
+  async function ucitaj() {
     try {
       const [d, podaci] = await Promise.all([dokumentiIzvor(), izvor().then((i) => i.ucitaj())]);
       ja = podaci.ja.id;
@@ -86,6 +87,12 @@
     } finally {
       ucitano = true;
     }
+  }
+
+  onMount(() => {
+    void ucitaj();
+    // The other parent's uploads and deletion proposals show up without a refresh.
+    return pratiPromene(izvor(), () => osvezi());
   });
 
   function otvori(id: string | null) {

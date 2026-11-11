@@ -289,5 +289,7 @@ export function napraviMockIzvor({ demo = true }: { demo?: boolean } = {}): Izvo
       sacuvaj(stanje);
     },
     ponovoOtvori: (id, razlog) => promeni(id, (s, ja, t) => ponovoOtvori(s, ja, razlog, t)),
+    // Demo data lives in this browser only: nobody else changes it.
+    naPromenu: () => () => {},
   };
 }

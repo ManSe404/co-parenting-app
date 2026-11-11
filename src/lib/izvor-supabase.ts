@@ -17,6 +17,7 @@ import { OBLASTI, RODITELJI } from './osnova';
 import { type RasporedCasova, sazetakRasporeda } from './raspored-casova';
 import { supabase } from './supabase';
 import type { OblastKljuc, Podaci, Roditelj, Stanje, Stavka, Unos, VrstaUnosa } from './tipovi';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 type Red = Record<string, unknown>;
 
@@ -28,6 +29,13 @@ function greska(e: unknown): GreskaPravila {
 }
 
 const STRANA = 1000;
+
+// The shared tables the screens read (all in the supabase_realtime
+// publication, migration 20261111030000_realtime.sql).
+const TABELE_PROMENA = [
+  'roditelj', 'stavka', 'unos', 'boravak', 'dogadjaj', 'zahtev_kalendara',
+  'karton_unos', 'karton_izmena', 'raspored_casova', 'dokument', 'dokument_trag', 'dokument_brisanje',
+];
 
 async function redovi<T = Red>(upit: PromiseLike<{ data: unknown; error: unknown }>): Promise<T[]> {
   const { data, error } = await upit;
@@ -76,8 +84,57 @@ export function napraviSupabaseIzvor(): Izvor {
     }
   }
 
+  // Realtime: one channel per family, opened for the first listener and
+  // closed after the last. What it delivers is decided by RLS, not by us:
+  // before Realtime sends a change to a subscriber it evaluates the table's
+  // SELECT policies with that subscriber's JWT, and every table here has RLS
+  // on with "clan cita …" (porodica_id = moja_porodica()) plus the
+  // restrictive MFA policy (migrations 20261104020000 and 20261104050000),
+  // so a parent gets only their family's rows (with MFA only at aal2) and an
+  // outsider gets nothing. The porodica_id filter below only trims the stream.
+  // Locally without the realtime service the subscription just never connects
+  // and the screens keep refreshing the old way (after their own actions).
+  const slusaoci = new Set<() => void>();
+  let kanal: RealtimeChannel | null = null;
+  let otvaranje: Promise<void> | null = null;
+
+  async function otvoriKanal(): Promise<void> {
+    const { data } = await sb.from('roditelj').select('porodica_id').limit(1).maybeSingle();
+    const porodica = (data?.porodica_id as string | undefined) ?? null;
+    if (!porodica || kanal || slusaoci.size === 0) return;
+    const k = sb.channel(`porodica-${porodica}`);
+    for (const tabela of TABELE_PROMENA) {
+      k.on('postgres_changes', { event: '*', schema: 'public', table: tabela, filter: `porodica_id=eq.${porodica}` }, () => {
+        for (const cb of slusaoci) cb();
+      });
+    }
+    k.subscribe();
+    kanal = k;
+  }
+
+  function zatvoriKanal(): void {
+    if (!kanal) return;
+    void sb.removeChannel(kanal);
+    kanal = null;
+  }
+
   return {
     demo: false,
+
+    naPromenu(cb) {
+      slusaoci.add(cb);
+      if (!kanal && !otvaranje) {
+        otvaranje = otvoriKanal()
+          .catch(() => {
+            /* no realtime (e.g. local without the service): nothing to follow */
+          })
+          .finally(() => (otvaranje = null));
+      }
+      return () => {
+        slusaoci.delete(cb);
+        if (slusaoci.size === 0) zatvoriKanal();
+      };
+    },
 
     async ucitaj(): Promise<Podaci> {
       const { data: s } = await sb.auth.getSession();

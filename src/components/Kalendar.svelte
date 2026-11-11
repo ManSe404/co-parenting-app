@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { izvor as dajIzvor, type Izvor } from '../lib/izvor';
+  import { pratiPromene } from '../lib/osvezavanje';
   import { plusDana, uDan } from '../lib/domen';
   import {
     type Boravak,
@@ -85,7 +86,12 @@
     const naPromenu = (e: MediaQueryListEvent) => (uski = e.matches);
     mq.addEventListener('change', naPromenu);
     ucitaj().catch((e) => (greska = e instanceof Error ? e.message : String(e)));
-    return () => mq.removeEventListener('change', naPromenu);
+    // The other parent's proposals and answers show up without a refresh.
+    const stani = pratiPromene(dajIzvor(), () => ucitaj());
+    return () => {
+      mq.removeEventListener('change', naPromenu);
+      stani();
+    };
   });
 
   $effect(() => {

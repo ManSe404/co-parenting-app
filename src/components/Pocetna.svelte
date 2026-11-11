@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { izvor } from '../lib/izvor';
+  import { pratiPromene } from '../lib/osvezavanje';
   import { danaDo, napraviPregled, uDan } from '../lib/domen';
   import { danasDugo, kada, pozdrav, pre, recenicaHitno, recenicaNaTebi, rok } from '../lib/format';
   import { putanje } from '../lib/putanje';
@@ -59,17 +60,19 @@
   let cekaTebe = $derived((p?.naPotezu.length ?? 0) + (kal?.naTebi.length ?? 0) + dokNaTebi.length);
   let cekaDrugog = $derived((p?.cekaDrugog.length ?? 0) + (kal?.cekaDrugog.length ?? 0) + dokCekaDrugog.length);
 
-  onMount(async () => {
-    try {
-      podaci = await (await izvor()).ucitaj();
-    } catch (e) {
-      greska = e instanceof Error ? e.message : String(e);
-    }
+  async function ucitaj() {
+    podaci = await (await izvor()).ucitaj();
     try {
       brisanja = await (await (await import('../lib/dokumenti-izvor')).dokumentiIzvor()).brisanja();
     } catch {
       /* documents are optional on the dashboard */
     }
+  }
+
+  onMount(() => {
+    ucitaj().catch((e) => (greska = e instanceof Error ? e.message : String(e)));
+    // The other parent's changes show up without a refresh.
+    return pratiPromene(izvor(), () => ucitaj());
   });
 
   const dan = new Intl.DateTimeFormat('sr-Latn-RS', { weekday: 'short' });
