@@ -1,0 +1,134 @@
+---
+// Public page: what the app keeps, who sees it, what is e-mailed, how to
+// export and how to delete. Readable without an account.
+import Ulaz from '../layouts/Ulaz.astro';
+import { putanja } from '../lib/putanje';
+import { REPO } from '../lib/osnova';
+---
+
+<Ulaz title="Privatnost" siroko>
+  <article class="card tekst">
+    <p class="eyebrow">Obaveštenje o privatnosti</p>
+    <h1>Šta se čuva i ko to vidi</h1>
+    <p class="dim">
+      Ova aplikacija je zajedničko mesto dva roditelja za jedno dete. Ovde piše šta se o vama i detetu čuva, gde,
+      ko to može da vidi, šta stiže mejlom, i kako da podatke izvezete ili obrišete.
+    </p>
+
+    <h2>Šta se čuva</h2>
+    <ul>
+      <li>
+        <b>Podaci iz aplikacije</b>: stavke (pitanja, odgovori, odluke), kalendar boravka i aktivnosti, karton deteta
+        (škola, zdravlje, kontakti, mere, raspored časova) i profili roditelja (telefon, adresa, mejl za kontakt,
+        napomena; sve je neobavezno).
+      </li>
+      <li>
+        <b>Dokumenti</b> (nalazi, potvrde, računi, skenovi): fajlovi stoje u <b>privatnom skladištu</b> bez javnih
+        linkova; otvaraju se linkom koji važi 10 minuta. Fotografije se pre slanja ponovo iscrtaju, pa ne nose
+        lokaciju ni podatke o telefonu.
+      </li>
+      <li>
+        <b>Nalog</b>: mejl kojim se prijavljuješ i lozinka (čuva se samo njen otisak), ili Google nalog ako njega
+        koristiš; ako uključiš dvostepenu prijavu, i tajna za kodove. Ništa od toga ne vidi drugi roditelj.
+      </li>
+      <li>
+        <b>Ime deteta se nigde ne traži ni ne prikazuje</b>; svuda piše „dete“. Imena roditelja takođe nisu
+        obavezna. Lični podaci ulaze samo ako ih vas dvoje sami upišete (npr. u karton).
+      </li>
+    </ul>
+    <p>
+      Sve to stoji u bazi na <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>-u (Postgres)
+      i njegovom skladištu, u regionu koji je izabrao vlasnik kopije; preporuka u uputstvu je <b>EU (Frankfurt)</b>.
+      Aplikacija sama nema server: pregledač razgovara direktno sa bazom. Nema analitike ni praćenja; pregledač
+      pamti samo prijavu i sitna podešavanja (npr. koji prikaz kalendara si gledao).
+    </p>
+
+    <h2>Ko to vidi</h2>
+    <ul>
+      <li>
+        Svaka porodica ima svoj prostor, a u prostoru su <b>samo dva roditelja</b>. Pravila u samoj bazi (RLS) puštaju
+        nalog samo do podataka njegove porodice; treći nalog ne vidi ništa, ni kad zna adresu baze.
+      </li>
+      <li>
+        Niko ne menja sam ono što se tiče oboje: zatvaranje dogovora, svaka promena kalendara i trajno brisanje
+        dokumenta traže pristanak drugog roditelja. Svaka izmena pamti ko ju je napravio i kada.
+      </li>
+      <li>
+        <b>Vlasnik kopije</b> (ko je podigao aplikaciju i napravio Supabase projekat) tehnički ima pristup bazi kao
+        njen administrator. Ako koristiš tuđu kopiju, pitaj vlasnika kako čuva pristup; ako podižeš svoju, pristup
+        imaš samo ti.
+      </li>
+    </ul>
+
+    <h2>Obaveštenja mejlom</h2>
+    <p>
+      Kad drugi roditelj nešto promeni (nova stavka ili odgovor, predlog za kalendar, dokument, karton), stiže ti mejl:
+      hitne stvari odmah, ostalo jednom dnevno. Mejl nosi naslov i kratak tekst promene i link ka aplikaciji; za
+      karton samo <b>naziv polja</b>, nikad vrednost (to mogu biti zdravstveni podaci). Mejlove šalje servis
+      <a href="https://resend.com" target="_blank" rel="noopener">Resend</a> na adresu kojom se prijavljuješ.
+    </p>
+    <p>
+      Isključuješ ih u <b>Podešavanja → Obaveštenja mejlom → Nikad</b>; tada se ništa ne šalje ni ne zakazuje, ni
+      hitno. Tu biraš i „Odmah“ umesto dnevnog pregleda.
+    </p>
+
+    <h2>Izvoz</h2>
+    <p>
+      Stavke se izvoze kao CSV (otvara se u Excelu ili Google tabelama) dugmetom <b>Izvezi</b> na listi stavki, sa
+      svim filterima koje si izabrao. Dokumente preuzimaš pojedinačno iz pregleda dokumenta. Kalendar i karton se za
+      sada ne izvoze posebno; vlasnik kopije može sve da izveze iz Supabase-a.
+    </p>
+
+    <h2>Brisanje</h2>
+    <p>
+      Prostor pripada oboma, pa se i briše <b>kad oba roditelja zatraže</b>: svako u <b>Podešavanja → Brisanje</b>
+      klikne „Zatraži brisanje“. Dok drugi ne zatraži, prvi može da odustane. Drugim zahtevom se brišu sve stavke,
+      kalendar, karton, profili, obaveštenja i svi fajlovi iz skladišta, bez kopije. Posle toga svako može da obriše i
+      svoj nalog (mejl, lozinku, MFA), na istom mestu. Porodica sa jednim roditeljem briše se odmah.
+    </p>
+    <p>
+      U demou (bez naloga) ništa ne ide u bazu: probni podaci stoje samo u tvom pregledaču i brišu se sa podacima
+      sajta.
+    </p>
+
+    <p class="faint mala">
+      Kod aplikacije je javan: <a href={REPO} target="_blank" rel="noopener">{REPO.replace('https://', '')}</a>.
+      Pravila opisana ovde stoje u <code>supabase/migrations</code> i proveravaju se testovima.
+    </p>
+    <p><a class="btn btn-ghost" href={putanja('/prijava/')}>Nazad na prijavu</a></p>
+  </article>
+</Ulaz>
+
+<style>
+  .tekst {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.6rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    margin-top: 0.6rem;
+  }
+
+  ul {
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mala {
+    font-size: 0.8rem;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+</style>

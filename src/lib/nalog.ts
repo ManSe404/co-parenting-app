@@ -239,6 +239,64 @@ export async function prihvatiPozivnicu(token: string): Promise<void> {
   if (error) throw new Error(poruka(error));
 }
 
+// ---------------------------------------------------------------------------
+// Deleting the family space (both parents must ask), then one's own account
+// ---------------------------------------------------------------------------
+
+export interface StanjeBrisanja {
+  jaZatrazio: boolean;
+  drugiZatrazio: boolean;
+  /** Both asked: only the files and rows are left to remove. */
+  odobreno: boolean;
+}
+
+export async function stanjeBrisanja(): Promise<StanjeBrisanja> {
+  const sb = supabase();
+  const { data: s } = await sb.auth.getSession();
+  const ja = s.session?.user.id;
+  const [{ data: rod, error }, { data: por, error: e2 }] = await Promise.all([
+    sb.from('roditelj').select('korisnik, brisanje_zatrazeno'),
+    sb.from('porodica').select('brisanje_odobreno').limit(1).maybeSingle(),
+  ]);
+  if (error) throw new Error(poruka(error));
+  if (e2) throw new Error(poruka(e2));
+  return {
+    jaZatrazio: !!rod?.find((r) => r.korisnik === ja)?.brisanje_zatrazeno,
+    drugiZatrazio: !!rod?.find((r) => r.korisnik !== ja)?.brisanje_zatrazeno,
+    odobreno: !!por?.brisanje_odobreno,
+  };
+}
+
+/**
+ * Asks for the space to be deleted. 'ceka' until the other parent asks too;
+ * with both, the files are removed through the Storage API and then every
+ * row ('obrisano').
+ */
+export async function obrisiPorodicu(): Promise<'ceka' | 'obrisano'> {
+  const sb = supabase();
+  for (let i = 0; i < 4; i++) {
+    const { data, error } = await sb.rpc('obrisi_porodicu');
+    if (error) throw new Error(poruka(error));
+    const r = data as { stanje: 'ceka' | 'fajlovi' | 'obrisano'; putanje?: string[] };
+    if (r.stanje !== 'fajlovi') return r.stanje;
+    const { error: e2 } = await sb.storage.from('dokumenti').remove(r.putanje ?? []);
+    if (e2) throw new Error(poruka(e2));
+  }
+  throw new Error('Fajlovi nisu obrisani do kraja. Probaj ponovo.');
+}
+
+export async function odustaniOdBrisanja(): Promise<void> {
+  const { error } = await supabase().rpc('odustani_od_brisanja');
+  if (error) throw new Error(poruka(error));
+}
+
+/** Removes the caller's own account; allowed only once out of a family space. */
+export async function obrisiNalog(): Promise<void> {
+  const { error } = await supabase().rpc('obrisi_nalog');
+  if (error) throw new Error(poruka(error));
+  await supabase().auth.signOut({ scope: 'local' });
+}
+
 /** Marks this visit; returns the previous one (start of "new since"). */
 export async function oznaciPosetu(): Promise<string | null> {
   const { data, error } = await supabase().rpc('oznaci_posetu');

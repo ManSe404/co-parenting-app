@@ -2,6 +2,7 @@
   // How often this parent gets e-mail about the other parent's changes.
   import { onMount } from 'svelte';
   import { type ObavestenjaIzvor, REZIMI, type RezimObavestenja, obavestenjaIzvor } from '../lib/obavestenja';
+  import { putanja } from '../lib/putanje';
 
   let iz = $state<ObavestenjaIzvor | null>(null);
   let rezim = $state<RezimObavestenja | null>(null);
@@ -59,6 +60,7 @@
 {#if greska}<p class="error" role="alert">{greska}</p>{/if}
 {#if sacuvano}<p class="ok" role="status">Sačuvano.</p>{/if}
 {#if iz?.demo}<p class="faint mala">U demou se mejlovi ne šalju.</p>{/if}
+<p class="faint mala">Šta tačno stiže mejlom: <a href={putanja('/privatnost/')}>obaveštenje o privatnosti</a>.</p>
 
 <style>
   .izbor {

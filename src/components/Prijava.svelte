@@ -167,6 +167,9 @@
   <p class="demo">
     Samo gledaš? <a href={`${putanja('/')}?demo=1`}>Isprobaj bez naloga</a>, na probnim podacima.
   </p>
+  <p class="demo">
+    <a href={putanja('/privatnost/')}>Šta se čuva, ko to vidi i kako se briše</a>
+  </p>
 {/if}
 
 <style>

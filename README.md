@@ -59,6 +59,13 @@ probati sam.
 - Demo važi samo za jedan tab, pa se nikad ne meša sa pravim nalogom.
 - Javni ključ u kodu (`PUBLIC_SUPABASE_KEY`, „publishable key“) je napravljen
   da bude javan; tajni ključevi se nigde ne koriste.
+- **Privatnost i brisanje**: strana `/privatnost/` (link sa prijave i iz
+  podešavanja) kaže šta se čuva, ko to vidi, šta stiže mejlom i kako se gasi.
+  Porodični prostor se briše kad **oba** roditelja zatraže (Podešavanja →
+  Brisanje): drugi zahtev briše sve redove i sve fajlove iz skladišta, bez
+  kopije; posle toga svako briše i svoj nalog. Dok drugi ne zatraži, prvi može
+  da odustane. Pravilo je u bazi (`obrisi_porodicu`, `obrisi_nalog`), sa
+  testom.
 
 ## Podigni svoju kopiju
 

@@ -2,6 +2,7 @@
   // Profile and account: both parents' details, MFA, inviting the other parent, sign out.
   import { onMount } from 'svelte';
   import { type Pristup, odjava, pristup } from '../lib/nalog';
+  import BrisanjePorodice from './BrisanjePorodice.svelte';
   import { putanja } from '../lib/putanje';
   import { izadjiIzDemoa, jeDemo } from '../lib/supabase';
   import MfaPodesavanje from './MfaPodesavanje.svelte';
@@ -68,7 +69,15 @@
     <MfaPodesavanje />
   </section>
 
+  <section class="card deo">
+    <h2>Brisanje</h2>
+    <BrisanjePorodice drugi={f.drugi?.oznaka ?? null} />
+  </section>
 {/if}
+
+<p class="faint privatnost">
+  Šta se čuva, ko to vidi, šta stiže mejlom i kako se briše: <a href={putanja('/privatnost/')}>obaveštenje o privatnosti</a>.
+</p>
 
 <style>
   .glava {
@@ -94,5 +103,10 @@
     padding: 0.45rem 0.85rem;
     font-size: 0.76rem;
     align-self: flex-start;
+  }
+
+  .privatnost {
+    font-size: 0.8rem;
+    max-width: 40rem;
   }
 </style>
