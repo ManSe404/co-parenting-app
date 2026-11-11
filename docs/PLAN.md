@@ -489,17 +489,63 @@ pisanje, samo funkcije. Aplikacija čita preko `src/lib/izvor-supabase.ts`; bez
 naloga (demo) i dalje radi na probnim podacima u pregledaču. Traka „probni
 podaci“ je uklonjena. Nov porodični prostor počinje prazan.
 
-Otvoreno posle F0: drugi roditelj vidi promene tek kad osveži stranu (bez
-Realtime-a); Supabase vraća najviše 1000 redova po tabeli (`max_rows`), što je
-dovoljno za godine rada, ali boravke treba jednom ograničiti na period;
-obaveštenja (F2).
+Otvoreno posle F0: Supabase vraća najviše 1000 redova po tabeli (`max_rows`),
+što je dovoljno za godine rada, ali boravke treba jednom ograničiti na period.
+(Realtime i obaveštenja su urađeni u F2, dole.)
+
+**F2 urađen (2026-11-11):** obaveštenja mejlom, Realtime, privatnost i brisanje.
+
+- **Pravila obaveštenja su u bazi** (`20261111010000_obavestenja.sql`):
+  okidači stavljaju red u `obavestenje` za drugog roditelja za novu stavku i
+  svaki unos u toku (odgovor, predlog i potvrda zatvaranja, odbijanje, izmena,
+  ponovno otvaranje), predlog za kalendar i odgovor na njega, nov dokument i
+  promenu kartona (samo naziv polja, nikad vrednost: to mogu biti zdravstveni
+  podaci). Hitno = oznaka Hitno ili predlog za naredna 48 h. Svaki roditelj
+  bira `odmah` / `dnevno` (podrazumevano) / `nikad` u Podešavanjima
+  (`postavi_obavestenja`); uz `nikad` se ništa ne zakazuje, a što je čekalo
+  se briše. Red čita i označava samo service role (`obavestenja_za_slanje`,
+  `oznaci_poslato`); roditelj vidi samo svoje redove. Test:
+  `supabase/tests/obavestenja.test.sql` (37 provera).
+- **Slanje**: Edge Function `supabase/functions/obavestenja` (Deno, bez
+  npm SDK-a), `?rezim=odmah|dnevno`, prima samo `service_role` ključ, jedan
+  mejl po primaocu preko Resend HTTP API-ja (hitno u naslovu, dnevni pregled
+  nabraja sve, linkovi na `APP_URL`), pa `oznaci_poslato`; neuspelo ostaje u
+  redu sa greškom i ponavlja se do 7 dana. Rasporedi
+  (`20261111020000_obavestenja_raspored.sql`): pg_cron na 5 minuta za
+  `odmah` i u 06:00 i 07:00 UTC za `dnevno` (funkcija `pozovi_obavestenja`
+  šalje samo kad je u Beogradu 8 h), kroz pg_net; adresa funkcije i ključ se
+  čitaju iz Vault-a; rasporedi se prave samo gde pg_cron i pg_net postoje, pa
+  lokalno i u testovima migracija prolazi bez njih.
+- **Realtime** (`20261111030000_realtime.sql`): deljene tabele su u
+  publikaciji `supabase_realtime`; aplikacija drži jedan kanal po porodici
+  (`izvor-supabase.ts`, `Izvor.naPromenu`), a ekrani sa deljenim podacima se
+  ponovo učitavaju 500 ms posle poslednje promene (`src/lib/osvezavanje.ts`,
+  Vitest). Šta kome stiže odlučuje RLS: Realtime proverava select politike
+  tabele sa JWT-om pretplatnika. Lokalni `npm run baza` ne diže realtime
+  servis, pa je to provereno čitanjem politika i testovima RLS-a, ne uživo;
+  prva prava provera je sa dva naloga na hostovanom projektu.
+- **Privatnost i brisanje** (`20261111040000_brisanje_porodice.sql`): strana
+  `/privatnost/` (link sa prijave i iz podešavanja); `obrisi_porodicu()` briše
+  sve tek kad oba roditelja zatraže (prvi može da odustane dok drugi ne
+  zatraži; fajlovi idu kroz Storage API uz politiku kante, pa svi redovi);
+  `obrisi_nalog()` briše sopstveni nalog kad je roditelj van prostora.
+  Test: `supabase/tests/brisanje_porodice.test.sql` (21 provera).
+
+Vlasnik još treba da (uputstvo u `supabase/functions/obavestenja/README.md`):
+napravi Resend nalog i potvrdi domen; upiše tajne `RESEND_API_KEY`,
+`OBAVESTENJA_FROM`, `APP_URL` (`npx supabase secrets set`); objavi funkciju
+(`npx supabase functions deploy obavestenja`); u hostovanom projektu uključi
+`pg_cron` i `pg_net` i upiše `obavestenja_url` i `obavestenja_kljuc` u Vault.
+Dok to ne uradi, red se puni, a mejlovi ne idu (stariji od 7 dana se
+preskaču).
 
 - **F0, postavka:** Astro projekat sa tokenima sa sajta, Supabase projekat,
   šema, RLS, okidač istorije, dva naloga, Cloudflare Pages.
 - **F1, MVP:** početna, lista, stavka, nova stavka, prelazi stanja,
   Predstojeće, Novo od poslednje posete, PWA, izvoz CSV.
-- **F2:** obaveštenja mejlom (Hitno odmah, ostalo jednom dnevno), dokumenti
-  (odeljak 6).
+- **F2 (urađeno 2026-11-11):** obaveštenja mejlom (Hitno odmah, ostalo jednom
+  dnevno), Realtime, privatnost i brisanje; dokumenti (odeljak 6, urađeni
+  2026-11-04).
 - **F3 (opciono):** troškovi.
 
 Napomena: bez obaveštenja se ovakva aplikacija lako zaboravi. Ako se posle F1
@@ -524,6 +570,20 @@ pokaže da je drugi roditelj ne otvara redovno, obaveštenja idu odmah.
   pomeranje samo jednom i svaki put; pomeren prelazak kao jednokratna promena;
   posle prevlačenja otvara se tačno jedan prozor, na sredini; u bazi: korisnik
   ne može direktno da piše u `boravak` i `dogadjaj` (test RLS-a u F0).
+- Obaveštenja (`supabase/tests/obavestenja.test.sql`, 37 provera): red dobija
+  samo drugi roditelj; Hitno i predlog u 48 h su hitni; karton bez vrednosti;
+  roditelj vidi samo svoje redove, druga porodica ništa, niko ne piše direktno;
+  `nikad` ništa ne zakazuje i briše što je čekalo; red za slanje čita samo
+  service role, `odmah` i `dnevno` vraćaju prave skupove, poslato se ne
+  ponavlja, neuspelo se pokušava ponovo. Edge Function je prošla kroz Node
+  sa lažnim `fetch`-om (401 bez ključa, grupisanje po primaocu, naslovi,
+  greška Resend-a ide u `oznaci_poslato`). Osvežavanje ekrana
+  (`src/lib/osvezavanje.test.ts`): jedno osvežavanje po nizu signala, bez
+  preklapanja, prekid odjavljuje.
+- Brisanje prostora (`supabase/tests/brisanje_porodice.test.sql`, 21 provera):
+  prvi zahtev čeka i može da se povuče, drugi odobrava, fajl se briše tek
+  tada i samo iz svoje porodice, pa svi redovi; druga porodica ostaje; nalog
+  se briše tek van prostora; sam roditelj briše odmah.
 - Dokumenti (`supabase/tests/dokumenti.test.sql`, 30 provera): otpremanje samo
   u folder svoje porodice; opis samo za fajl koji postoji, sa tipom i veličinom
   iz fajla; drugi roditelj vidi i otvara, stranac i neprijavljen ne; fajl se ne

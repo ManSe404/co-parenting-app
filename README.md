@@ -35,6 +35,9 @@ probati sam.
   Brisanje samo skloni dokument u „Obrisani“; trajno brisanje traži oba
   roditelja.
 - **Profil roditelja**: telefon, adresa za primopredaju, mejl, napomena.
+- **Obaveštenja mejlom**: kad drugi roditelj nešto promeni, stiže mejl (hitno
+  odmah, ostalo jednom dnevno, ili nikad; bira se u podešavanjima). Promene
+  drugog roditelja se u aplikaciji vide i bez osvežavanja strane.
 - **Nalozi**: mejl i lozinka sa potvrdom mejla, dvostepena prijava (MFA,
   kodovi iz aplikacije), opciono Google. Prvi roditelj otvara porodični
   prostor i šalje drugom link za poziv (važi 7 dana, radi jednom i samo za
@@ -116,6 +119,13 @@ Treba ti nalog na GitHub-u i besplatan nalog na [supabase.com](https://supabase.
 6. **Google prijava** (opciono): u Google Cloud Console napravi OAuth klijent
    (Web application) sa redirect URI `https://<ref>.supabase.co/auth/v1/callback`,
    pa ga upiši u Supabase → Authentication → Providers → Google.
+7. **Obaveštenja mejlom** (opciono; bez ovoga aplikacija radi, samo mejlovi ne
+   idu): nalog na [resend.com](https://resend.com) sa potvrđenim domenom, tajne
+   funkcije (`npx supabase secrets set RESEND_API_KEY=… OBAVESTENJA_FROM=…
+   APP_URL=…`), `npx supabase functions deploy obavestenja`, pa u Supabase-u
+   uključi ekstenzije `pg_cron` i `pg_net` i upiši adresu funkcije i
+   `service_role` ključ u Vault. Tačne komande i gde se šta uzima:
+   `supabase/functions/obavestenja/README.md`.
 
 Ako tvoja kopija prima druge porodice, ti čuvaš njihove podatke (i
 zdravstvene); pre toga razmisli o obaveštenju o privatnosti i brisanju naloga.
@@ -150,7 +160,7 @@ id i tajna u `supabase/.env` kao `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` i
 ```bash
 npm test             # pravila aplikacije (Vitest)
 npm run check        # astro check + svelte-check, bez grešaka i upozorenja
-npm run test:baza    # pravila baze (pgTAP): porodica, MFA, stavke, kalendar, karton, dokumenti, profil, ko šta vidi, granice
+npm run test:baza    # pravila baze (pgTAP): porodica, MFA, stavke, kalendar, karton, dokumenti, profil, ko šta vidi, granice, obaveštenja, brisanje prostora
 npm run smoke        # demo kroz headless Chrome: stavke, tabla, kalendar, karton, dokumenti, profil
 npm run smoke:nalog  # dva prava naloga u odvojenim pregledačima (treba baza + dev:baza)
 ```
@@ -166,12 +176,15 @@ src/lib/karton.ts          karton: polja, spiskovi, istorija izmena
 src/lib/raspored-casova.ts raspored časova: ručno, CSV/Excel (.xlsx bez biblioteke), slika
 src/lib/dokumenti.ts       dokumenti: kategorije, provere, brisanje i trajno brisanje
 src/lib/profil.ts          profil roditelja
+src/lib/obavestenja.ts     obaveštenja mejlom: izbor odmah / dnevno / nikad
+src/lib/osvezavanje.ts     ekran se ponovo učitava kad drugi roditelj nešto promeni (Realtime)
 src/lib/izvor.ts           interfejs ka podacima: demo (mock/) bez naloga, baza sa nalogom
 src/lib/izvor-supabase.ts  stavke, kalendar i karton iz baze
 src/lib/nalog.ts           prijava, MFA, porodični prostor, poziv
 src/components/            Svelte ekrani
 supabase/migrations/       šema, pravila (RLS) i funkcije
 supabase/tests/            testovi baze (pgTAP)
+supabase/functions/        Edge Function koja šalje obaveštenja (Resend), sa uputstvom
 scripts/                   testovi kroz pregledač
 docs/PLAN.md               plan, odluke i faze (na srpskom)
 ```
