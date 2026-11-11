@@ -5,6 +5,7 @@
   import { putanja } from '../lib/putanje';
   import { izadjiIzDemoa, jeDemo } from '../lib/supabase';
   import MfaPodesavanje from './MfaPodesavanje.svelte';
+  import ObavestenjaPodesavanje from './ObavestenjaPodesavanje.svelte';
   import PozoviRoditelja from './PozoviRoditelja.svelte';
   import ProfilRoditelja from './ProfilRoditelja.svelte';
 
@@ -31,6 +32,10 @@
 {#if demo}
   <ProfilRoditelja />
   <section class="card deo">
+    <h2>Obaveštenja mejlom</h2>
+    <ObavestenjaPodesavanje />
+  </section>
+  <section class="card deo">
     <h2>Demo</h2>
     <p class="dim">Gledaš probne podatke, bez naloga.</p>
     <a class="btn" href={putanja('/prijava/')} onclick={() => izadjiIzDemoa()}>Izađi iz demoa i prijavi se</a>
@@ -51,6 +56,11 @@
     <h2>Nalog</h2>
     <p>Prijavljen si kao <b>{p.email}</b>; u zajedničkom prostoru si <b>{f.ja.oznaka}</b>.</p>
     <button class="btn btn-ghost mali" onclick={izlaz}>Odjavi se</button>
+  </section>
+
+  <section class="card deo">
+    <h2>Obaveštenja mejlom</h2>
+    <ObavestenjaPodesavanje />
   </section>
 
   <section class="card deo">
