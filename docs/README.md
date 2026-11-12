@@ -7,7 +7,7 @@ Read in this order:
 
 | # | Document | What it answers | Status | Last checked |
 |---|---|---|---|---|
-| 1 | [product/vision.md](product/vision.md) | why the app exists, for whom, what it is not | current | 2026-11-11 |
+| 1 | [product/vision.md](product/vision.md) | the problem, how the app solves it, why this way, for whom, what it is not, how we know it works | current | 2026-11-12 |
 | 2 | [product/glossary.md](product/glossary.md) | the Serbian words of the screens, the code and the database | current | 2026-11-11 |
 | 3 | [product/features/home.md](product/features/home.md) | what the home screen shows | current | 2026-11-11 |
 | 4 | [product/features/items.md](product/features/items.md) | items, their states, the board, the list and the history | current | 2026-11-11 |

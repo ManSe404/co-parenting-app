@@ -1,10 +1,11 @@
 # co-parenting-app
 
-A shared space for two parents who look after one child separately: questions and agreements, a calendar of who
-has the child and of the child's activities, the child's record and documents. Nothing that concerns both parents
-changes without the other's consent: closing an agreement, any change to the calendar and deleting a document for
-good all need the other parent, and the database enforces that rule, not only the app. The interface is in Serbian
-(Latin script).
+Two parents who look after one child separately still decide together about school, health, activities and who has
+the child when, but in a chat those decisions get lost and one parent can change a plan alone. This app gives both
+parents one shared space for questions and agreements, the calendar, the child's record and documents, where nothing
+that concerns both changes without the other parent's consent, a rule the database enforces, not only the screens.
+The problem, the solution and why it is built this way: [docs/product/vision.md](docs/product/vision.md). The
+interface is in Serbian (Latin script).
 
 It is for the two parents of one child, and for anyone who wants to run their own copy for their family on a free
 Supabase project.
