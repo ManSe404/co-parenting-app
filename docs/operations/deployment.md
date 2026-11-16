@@ -51,12 +51,19 @@ A copy needs a GitHub account and a free account at [supabase.com](https://supab
    `obavestenja_url` and `obavestenja_kljuc`. The exact commands, and where each value comes from:
    `supabase/functions/obavestenja/README.md`.
 
+   The migration `20261111020000_obavestenja_raspored.sql` creates the two schedules only if `pg_cron` and `pg_net`
+   are already on when it runs, and says so only in a notice. If you pushed the migrations in step 2 before turning
+   the extensions on, run that migration's last `do` block again in the SQL editor, then check that
+   `select jobname from cron.job;` lists `obavestenja-odmah` and `obavestenja-dnevno`. Without them no e-mail goes
+   out and nothing reports an error.
+
 If your copy takes in other families, you keep their data, health data included. Think about a privacy notice and
 account deletion for them first; the app's own are described in
 [product/features/privacy.md](../product/features/privacy.md).
 
 ## Checking a running copy
 
+- The schedules: `select jobname, schedule from cron.job;` lists `obavestenja-odmah` and `obavestenja-dnevno`.
 - The schedule's calls and their answers: the table `net._http_response`.
 - E-mails that failed: rows in `obavestenje` with `greska` set; they are tried again for up to 7 days.
 - A manual send, instead of waiting for the schedule, is in `supabase/functions/obavestenja/README.md`.

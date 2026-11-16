@@ -10,7 +10,7 @@
 
 ```bash
 npm install
-npm run dev         # http://127.0.0.1:8040, demo data in the browser
+npm run dev         # http://localhost:8040, demo data in the browser
 npx astro dev stop  # the Astro dev server keeps running in the background
 ```
 

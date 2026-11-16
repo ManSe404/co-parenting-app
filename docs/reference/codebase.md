@@ -11,13 +11,20 @@ comments are in English.
 |---|---|
 | `astro.config.mjs` | static output, `BASE_PATH`, Svelte; with `BAZA=lokalno` it takes the local Supabase address and key from the CLI |
 | `svelte.config.js`, `tsconfig.json` | Svelte preprocessing; strict TypeScript, which leaves out `supabase/functions` (Deno) |
-| `package.json`, `.node-version` | scripts and dependencies; the Node version for builds |
+| `package.json`, `package-lock.json`, `.node-version` | scripts and dependencies, their locked versions; the Node version for builds |
 | `public/` | `favicon.svg` |
-| `scripts/` | browser smoke tests over the Chrome DevTools protocol, with `fixtures/` (a timetable as CSV and as a picture) |
-| `src/` | the app |
+| `scripts/` | browser smoke tests over the Chrome DevTools protocol (`smoke-demo.mjs`, `smoke-nalog.mjs`), with `fixtures/` (a timetable as CSV and as a picture) |
+| `src/` | the site |
 | `supabase/` | migrations, database tests, the Edge Function and the local configuration |
-| `.github/workflows/pages.yml` | the optional GitHub Pages deploy |
+| `.github/workflows/pages.yml` | the optional GitHub Pages deploy; the only workflow |
 | `docs/` | these documents |
+| `README.md`, `LICENSE` | the introduction; the MIT licence |
+| `.gitignore` | keeps `node_modules/`, `dist/`, `.astro/` and `.env` files (all but `.env.example`) out of git |
+
+Three parts are deployed separately: the site (`src/`, built to `dist/`), the database (`supabase/migrations/`) and
+the sender (`supabase/functions/obavestenja/`). Each has a page under [services/](services/site.md):
+[site](services/site.md), [database](services/database.md), [obavestenja](services/obavestenja.md). Which feature
+lives where: [product/features/README.md](../product/features/README.md).
 
 ## src/pages and src/layouts
 
@@ -89,5 +96,6 @@ mode decided before the page paints. `Ulaz.astro` frames the screens before the 
 | `migrations/` | schema, RLS, functions, triggers, Realtime, schedules; see [data-model.md](data-model.md) |
 | `tests/` | pgTAP tests, `npm run test:baza` |
 | `functions/obavestenja/` | the Edge Function that sends notification e-mails, with its setup guide |
-| `config.toml` | the local Supabase: ports 8040 to 8048, auth settings, `max_rows` |
-| `README.md` | what is in the folder and how migrations reach a hosted project |
+| `config.toml` | the local Supabase: ports 8041 to 8048, auth settings, `max_rows` |
+| `README.md` | what is in the folder and how migrations reach a hosted project (in Serbian) |
+| `.gitignore` | the Supabase CLI's working folders and local env files |

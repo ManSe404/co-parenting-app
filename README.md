@@ -17,7 +17,7 @@ in your browser; the Tata / Mama switcher at the top lets you play both parents.
 
 ```bash
 npm install
-npm run dev         # http://127.0.0.1:8040, demo data in the browser
+npm run dev         # http://localhost:8040, demo data in the browser
 ```
 
 With a local database (needs Docker): `npm run baza`, then `npm run dev:baza`. Details are in
@@ -27,7 +27,7 @@ With a local database (needs Docker): `npm run baza`, then `npm run dev:baza`. D
 ## Documentation
 
 Start at [docs/README.md](docs/README.md): what the app does, how it is built and protected, the map of the code,
-the checks and the roadmap.
+the checks and the roadmap. Every feature with its status: [docs/product/features/README.md](docs/product/features/README.md).
 
 ## Licence
 

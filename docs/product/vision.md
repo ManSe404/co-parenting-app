@@ -60,6 +60,8 @@ The parts of the app:
 - [Notifications](features/notifications.md): e-mail about the other parent's changes, and live updates.
 - [Privacy and deletion](features/privacy.md): what is kept, who sees it, how a family space is deleted.
 
+Every feature with its status and where it lives in the code: [features/README.md](features/README.md).
+
 A demo runs on example data in the browser, with no account: `?demo=1` on a copy with a database, or any
 build without Supabase settings.
 
@@ -79,8 +81,9 @@ The options the plan and the code weighed, and why they lost:
 - Open: which host serves the owner's copy. The plan chose Cloudflare Pages, so that the app does not share the
   `github.io` origin and the sign-in kept in the browser with the owner's other sites; the workflow and the README
   use GitHub Pages ([roadmap.md](../roadmap.md#open), [architecture/overview.md](../architecture/overview.md#open)).
-- Open: there are no ADRs yet (`docs/adr/` does not exist). The decisions above are recorded only in the plan
-  ([roadmap.md, section 9](../roadmap.md#9-decisions)).
+- The decisions whose reasons the plan records are also written down as ADRs in [adr/](../adr/): Supabase as the
+  backend, the consent rules in the database, the family space and the invitation, e-mail as the login name, public
+  code with a private copy, and the record edited directly with a log.
 
 ## For whom
 

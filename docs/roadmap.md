@@ -25,9 +25,25 @@ code that any family can run as its own copy on free services. See [product/visi
 - Export to XLSX, and a weekly automatic export through a GitHub Action that would also be a backup and keep a
   free Supabase project from pausing after a week without activity. Only CSV export from the screens exists.
 - Linking a document to an item or to the record.
-- Limiting stays to a period: Supabase returns at most 1000 rows per request (`max_rows`).
+- Reading less on each refresh. The app reads every table in pages of 1000 rows (`max_rows`), so nothing is cut
+  off, but every refresh, including each one a live update triggers, reads every row of every table from the start,
+  so it grows with the family's history.
 - A one-way copy from Supabase to a Google Sheet, only if a sheet for reading is ever needed. The sheet would
   never be a source of data.
+
+## Structural work
+
+In priority order. Each item names what goes wrong today.
+
+| # | What | Why | Status |
+|---|---|---|---|
+| 1 | A pull-request workflow that runs `npm test`, `npm run check`, `npm run build` and the pgTAP tests (`supabase start`, `supabase test db`), required by the branch ruleset | A merge to `main` publishes the site and, through the Supabase GitHub integration, applies new migrations to the hosted project. Nothing runs the tests before that, and the pgTAP tests run only on a machine with the local database | not started |
+| 2 | A way to create the notification schedules after `pg_cron` and `pg_net` are turned on, for example a function the owner calls once, or a check that warns while the schedules are missing | `20261111020000_obavestenja_raspored.sql` creates the schedules only if both extensions are on when the migration runs. A copy that pushes the migrations first and turns the extensions on later has no schedules and sends no e-mail, with no error anywhere | documented in [operations/deployment.md](operations/deployment.md); not fixed in code |
+| 3 | Show "Nastavi preko Google-a" only when the copy has Google sign-in on, for example behind a build setting | The button is always shown (`src/components/Prijava.svelte`). With Google off, which is the default, it sends the parent to Supabase's error page | not started |
+| 4 | Database types generated with `supabase gen types` and used by `createClient` | The data source casts every column by hand (`src/lib/izvor-supabase.ts`, `dokumenti-supabase.ts`), and the Edge Function mirrors its row by hand. A renamed column passes `npm run check` and shows up as `undefined` at run time | not started |
+| 5 | Clean up a file whose `dodaj_dokument` call failed | `src/lib/dokumenti-supabase.ts` uploads the file first, then registers it. If the registration fails, the file stays in the bucket, invisible, and no policy lets anyone remove it until the family space is deleted | not started |
+| 6 | Split `src/components/Kalendar.svelte` (about 690 lines of script and markup, plus about 740 of styles) | It holds the requests waiting for an answer, the month view, the selected day, the history of changes, the drag handling and two dialogs; a change to one of them means reading all of it | not started |
+| 7 | Group the screens and their data access by feature | Items, the calendar and the record share one data source (`Izvor`, with two implementations of about 300 and 400 lines), while documents, profiles and notifications each have their own. A new action on an item touches `izvor.ts`, `izvor-supabase.ts` and `mock/izvor-mock.ts` | open: worth it only if the app keeps growing |
 
 ## Where the plan and the code differ
 
@@ -65,6 +81,9 @@ code that any family can run as its own copy on free services. See [product/visi
 
 - Whether to build the PWA and the automatic export, or drop them from the plan.
 - Which host serves the owner's copy (above).
+- Whether the TypeScript copy of the rules (for the demo and the screens) and the SQL copy should be checked against
+  each other automatically, or the demo dropped; the reason for keeping both is not recorded beyond
+  [guides/development.md](guides/development.md#how-the-code-is-organised).
 
 ## Original plan text
 

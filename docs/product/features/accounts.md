@@ -6,7 +6,8 @@ Sign-in, MFA, the family space and the invitation (`src/lib/nalog.ts`; screens `
 - **Sign-in** with e-mail and password. The e-mail is confirmed by a link, and a forgotten password is reset by
   e-mail. A password has at least 10 characters, with letters and digits (`supabase/config.toml` for the local
   database; a hosted project sets the same in its dashboard). Google sign-in is optional and stays off until the
-  owner of a copy sets up an OAuth client.
+  owner of a copy sets up an OAuth client. The "Nastavi preko Google-a" button shows either way; with Google off it
+  leads to Supabase's error page ([roadmap.md](../../roadmap.md#structural-work)).
 - **MFA** with a code from an authenticator app (TOTP), turned on or off in the settings. With MFA on, the
   database also waits for the second step: a restrictive policy on every table lets data through only at
   `aal2`.
