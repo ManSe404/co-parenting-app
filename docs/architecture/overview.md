@@ -31,7 +31,11 @@ Diagrams: [context](../diagrams/context.md) and [containers](../diagrams/contain
 | Sender | the Edge Function `obavestenja` (Deno, no npm SDK) | `supabase/functions/obavestenja/` |
 | Hosting | the static files from `npm run build` (`dist/`) on Cloudflare Pages or GitHub Pages | `astro.config.mjs`, `.github/workflows/pages.yml` |
 
-The full map of the code: [reference/codebase.md](../reference/codebase.md).
+The full map of the code: [reference/codebase.md](../reference/codebase.md). The three parts that are deployed
+separately, the site, the database and the sender, each have a page under
+[reference/services/](../reference/services/site.md). The decisions behind this shape are in [adr/](../adr/):
+Supabase as the backend ([0001](../adr/0001-supabase-as-the-backend.md)) and the consent rules in the database
+([0002](../adr/0002-consent-rules-in-the-database.md)).
 
 ## Two modes
 
@@ -82,7 +86,7 @@ applied in order and never changed once applied; a change adds a new migration (
   sub-path (a GitHub Pages project site) or at the root (Cloudflare Pages, local). GitHub Pages deploys through
   `.github/workflows/pages.yml` on a push to `main`, only when the repository variable `OBJAVI_PAGES` is `da`.
 - **The database.** Migrations reach a hosted project through the Supabase GitHub integration on a push to
-  `main`, or by hand with `npx supabase db push` (`supabase/README.md`).
+  `main`, or by hand with `npx supabase db push` (`supabase/README.md`). No workflow runs the tests first.
 - **The sender.** `npx supabase functions deploy obavestenja`, with its secrets and the schedule's Vault entries
   (`supabase/functions/obavestenja/README.md`).
 
@@ -95,7 +99,8 @@ errors: [crosscutting.md](crosscutting.md).
   `github.io` origin, and the sign-in kept in the browser, with the owner's other GitHub Pages sites. The workflow
   `.github/workflows/pages.yml`, however, falls back to the owner's Supabase project when it runs in the owner's
   repository, and the README links the demo on GitHub Pages. Which one is meant is not decided in the code.
-- **Row limit.** Supabase returns at most 1000 rows per request (`max_rows` in `supabase/config.toml`); stays are
-  not yet limited to a period.
+- **Reading everything on each refresh.** Supabase returns at most 1000 rows per request (`max_rows` in
+  `supabase/config.toml`), so the data source reads in pages and nothing is cut off. Every refresh, including each
+  one a live update triggers, still reads every row of every table, so the load grows with the family's history.
 - **Realtime and the sender locally.** `npm run baza` starts the local Supabase without the Realtime and Edge
   runtime services, so live updates and the sender do not run locally by default.

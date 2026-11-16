@@ -45,10 +45,15 @@ supabase/.env`). That file is never committed.
 | `max_rows` | `[api]` in `supabase/config.toml` (1000) | the most rows one request returns |
 
 Local ports, all in `supabase/config.toml` and `package.json`: the app 8040, API 8041, Postgres 8042, Studio 8043,
-Mailpit 8044 (the local inbox for confirmation e-mails), 8045 to 8048 internal.
+Mailpit 8044 (the local inbox for confirmation e-mails), 8045 to 8048 internal. The dev server listens on
+`localhost` (Astro's default host); `site_url` in `supabase/config.toml` is `http://127.0.0.1:8040`, and both
+addresses are allowed redirects.
 
 ## Tests
 
 | Setting | Read by | Meaning |
 |---|---|---|
 | `CHROME` | `scripts/smoke-demo.mjs`, `scripts/smoke-nalog.mjs` | the Chrome binary; `google-chrome` on `PATH` when unset |
+| `BASE_URL` | `scripts/smoke-demo.mjs`, `scripts/smoke-nalog.mjs` | the running app; `http://127.0.0.1:8040` when unset. The dev server listens on `localhost`, so set `BASE_URL=http://localhost:8040` where `localhost` is not `127.0.0.1` |
+| `MAILPIT_URL` | `scripts/smoke-nalog.mjs` | the local Mailpit inbox; `http://127.0.0.1:8044` when unset |
+| `SNIMCI` | `scripts/smoke-demo.mjs` | a folder; when set, the script saves a screenshot of each dialog it checks there |
