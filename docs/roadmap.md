@@ -37,7 +37,7 @@ In priority order. Each item names what goes wrong today.
 
 | # | What | Why | Status |
 |---|---|---|---|
-| 1 | A pull-request workflow that runs `npm test`, `npm run check`, `npm run build` and the pgTAP tests (`supabase start`, `supabase test db`), required by the branch ruleset | A merge to `main` publishes the site and, through the Supabase GitHub integration, applies new migrations to the hosted project. Nothing runs the tests before that, and the pgTAP tests run only on a machine with the local database | not started |
+| 1 | A pull-request workflow that runs `npm test`, `npm run check`, `npm run build` and the pgTAP tests (`supabase start`, `supabase test db`), required by the branch ruleset | A merge to `main` publishes the site and, through the Supabase GitHub integration, applies new migrations to the hosted project. The pgTAP tests run only on a machine with the local database, so a migration can reach the hosted project untested | partial: `.github/workflows/checks.yml` runs the tests, the checks, the build and the demo smoke test and is required on `main`; the pgTAP tests are not in it yet |
 | 2 | A way to create the notification schedules after `pg_cron` and `pg_net` are turned on, for example a function the owner calls once, or a check that warns while the schedules are missing | `20261111020000_obavestenja_raspored.sql` creates the schedules only if both extensions are on when the migration runs. A copy that pushes the migrations first and turns the extensions on later has no schedules and sends no e-mail, with no error anywhere | documented in [operations/deployment.md](operations/deployment.md); not fixed in code |
 | 3 | Show "Nastavi preko Google-a" only when the copy has Google sign-in on, for example behind a build setting | The button is always shown (`src/components/Prijava.svelte`). With Google off, which is the default, it sends the parent to Supabase's error page | not started |
 | 4 | Database types generated with `supabase gen types` and used by `createClient` | The data source casts every column by hand (`src/lib/izvor-supabase.ts`, `dokumenti-supabase.ts`), and the Edge Function mirrors its row by hand. A renamed column passes `npm run check` and shows up as `undefined` at run time | not started |
@@ -52,7 +52,7 @@ In priority order. Each item names what goes wrong today.
   in section 9 matches the code.
 - **PWA.** Sections 2 and 7 plan installing as an app. There is no web app manifest and no service worker.
 - **Export.** Section 6 plans CSV and XLSX export and a weekly export through a GitHub Action. The code exports CSV
-  only, and the only workflow is the GitHub Pages one.
+  only, and no workflow exports anything.
 - **Timetable photo.** Section 5 says the photo goes to the private storage, like the documents. The code keeps it
   as a data URL in `raspored_casova.slika`.
 - **Schema.** The first draft in section 6 has the tables `oblast` and `izmena`. Neither exists: the areas are a

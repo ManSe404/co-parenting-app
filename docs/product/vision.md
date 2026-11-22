@@ -137,8 +137,9 @@ what each one covers is listed in [roadmap.md, section 8](../roadmap.md#8-tests)
 | The flows in a browser: the demo, and two real accounts in separate browsers | `npm run smoke`, `npm run smoke:nalog` | `scripts/` |
 | Types and components, with no errors and no warnings | `npm run check` | |
 
-No CI runs these checks: the only workflow is the optional GitHub Pages deploy. They run only by hand, and
-[guides/development.md](../guides/development.md) asks for them before a commit.
+CI runs `npm test`, `npm run check`, the build and `npm run smoke` on every pull request, and a merge to `main`
+needs it to pass. The database tests and the two-account smoke test need the local database, so they run only by
+hand; [guides/development.md](../guides/development.md) asks for them before a commit.
 
 Not covered by a check in the repository:
 
