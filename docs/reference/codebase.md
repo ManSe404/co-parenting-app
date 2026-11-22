@@ -16,7 +16,8 @@ comments are in English.
 | `scripts/` | browser smoke tests over the Chrome DevTools protocol (`smoke-demo.mjs`, `smoke-nalog.mjs`), with `fixtures/` (a timetable as CSV and as a picture) |
 | `src/` | the site |
 | `supabase/` | migrations, database tests, the Edge Function and the local configuration |
-| `.github/workflows/pages.yml` | the optional GitHub Pages deploy; the only workflow |
+| `.github/workflows/checks.yml` | CI on every pull request and on `main`: tests, checks, build and the demo smoke test; required by the branch ruleset |
+| `.github/workflows/pages.yml` | the optional GitHub Pages deploy |
 | `docs/` | these documents |
 | `README.md`, `LICENSE` | the introduction; the MIT licence |
 | `.gitignore` | keeps `node_modules/`, `dist/`, `.astro/` and `.env` files (all but `.env.example`) out of git |

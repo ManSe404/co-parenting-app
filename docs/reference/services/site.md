@@ -22,6 +22,7 @@ npm run preview     # serve dist/ on port 8040
 ```
 
 Checks: `npm test`, `npm run check`, `npm run smoke`, `npm run smoke:nalog` ([guides/development.md](../../guides/development.md)).
+CI (`.github/workflows/checks.yml`) runs all but `smoke:nalog` on every pull request.
 
 ## Configuration
 

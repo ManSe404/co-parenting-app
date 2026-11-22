@@ -7,7 +7,7 @@ Read in this order:
 
 | # | Document | What it answers | Status | Last checked |
 |---|---|---|---|---|
-| 1 | [product/vision.md](product/vision.md) | the problem, how the app solves it, why this way, for whom, what it is not, how we know it works | current | 2026-11-16 |
+| 1 | [product/vision.md](product/vision.md) | the problem, how the app solves it, why this way, for whom, what it is not, how we know it works | current | 2026-11-22 |
 | 2 | [product/features/README.md](product/features/README.md) | every feature, its status and where it lives in the code | current | 2026-11-16 |
 | 3 | [product/glossary.md](product/glossary.md) | the Serbian words of the screens, the code and the database | current | 2026-11-16 |
 | 4 | [product/features/home.md](product/features/home.md) | what the home screen shows | current | 2026-11-16 |
@@ -19,7 +19,7 @@ Read in this order:
 | 10 | [product/features/notifications.md](product/features/notifications.md) | e-mail notifications and live updates | current | 2026-11-16 |
 | 11 | [product/features/privacy.md](product/features/privacy.md) | the privacy page, export, deleting a family space or an account | current | 2026-11-16 |
 | 12 | [design/screens.md](design/screens.md) | how the screens were planned, with the look and the navigation as built | current | 2026-11-16 |
-| 13 | [roadmap.md](roadmap.md) | phases and their status, what is not built, structural work in priority order, where the plan and the code differ, the plan's data, tests and decisions | current | 2026-11-16 |
+| 13 | [roadmap.md](roadmap.md) | phases and their status, what is not built, structural work in priority order, where the plan and the code differ, the plan's data, tests and decisions | current | 2026-11-22 |
 | 14 | [architecture/overview.md](architecture/overview.md) | how it is built: context, building blocks, flows, data, deployment | current | 2026-11-16 |
 | 15 | [architecture/crosscutting.md](architecture/crosscutting.md) | security, privacy, errors, observability | current | 2026-11-16 |
 | 16 | [adr/](#decisions) | the decisions whose reasons are recorded, one per file | current | 2026-11-16 |
@@ -27,14 +27,14 @@ Read in this order:
 | 18 | [diagrams/container.md](diagrams/container.md) | the parts that run and how they talk | current | 2026-11-16 |
 | 19 | [diagrams/proposal-flow.md](diagrams/proposal-flow.md) | a calendar proposal from one parent to the other | current | 2026-11-16 |
 | 20 | [diagrams/notification-flow.md](diagrams/notification-flow.md) | a change becoming an e-mail | current | 2026-11-16 |
-| 21 | [reference/codebase.md](reference/codebase.md) | the map of the code | current | 2026-11-16 |
-| 22 | [reference/services/site.md](reference/services/site.md) | the static site: what it does, how to run it, its contracts | current | 2026-11-16 |
+| 21 | [reference/codebase.md](reference/codebase.md) | the map of the code | current | 2026-11-22 |
+| 22 | [reference/services/site.md](reference/services/site.md) | the static site: what it does, how to run it, its contracts | current | 2026-11-22 |
 | 23 | [reference/services/database.md](reference/services/database.md) | the Supabase schema and rules: running, testing, deploying, contracts | current | 2026-11-16 |
 | 24 | [reference/services/obavestenja.md](reference/services/obavestenja.md) | the Edge Function that sends e-mail: request, answers, secrets | current | 2026-11-16 |
 | 25 | [reference/data-model.md](reference/data-model.md) | tables, functions, triggers, storage, Realtime, schedules | current | 2026-11-16 |
 | 26 | [reference/configuration.md](reference/configuration.md) | every setting by name and where it is set | current | 2026-11-16 |
 | 27 | [guides/setup.md](guides/setup.md) | running the demo and the local database | current | 2026-11-16 |
-| 28 | [guides/development.md](guides/development.md) | checks, how the code is organised, conventions | current | 2026-11-16 |
+| 28 | [guides/development.md](guides/development.md) | checks, how the code is organised, conventions | current | 2026-11-22 |
 | 29 | [operations/deployment.md](operations/deployment.md) | deploying your own copy and checking it | current | 2026-11-16 |
 
 ## Decisions

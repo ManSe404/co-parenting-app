@@ -15,9 +15,12 @@ npm run preview      # serve dist/ on port 8040
 The smoke scripts look for the app at `http://127.0.0.1:8040`; where the dev server answers only on `localhost`, run
 them as `BASE_URL=http://localhost:8040 npm run smoke` ([configuration](../reference/configuration.md#tests)).
 
-No CI runs these: the only workflow is the optional GitHub Pages deploy, and a merge to `main` also applies new
-migrations to the hosted project through the Supabase GitHub integration. Run them before a commit, and
-`npm run test:baza` before merging a migration. There is no lint step; `npm run check` fails on any warning.
+CI (`.github/workflows/checks.yml`, the job `checks`) runs `npm test`, `npm run check`, `npm run build` and
+`npm run smoke` against the built demo (served by `astro preview`) on every pull request and on `main`; the branch
+ruleset requires it before a merge. It needs no Supabase and no secret. `npm run test:baza` and
+`npm run smoke:nalog` need the local database and run only by hand: a merge to `main` also applies new migrations
+to the hosted project through the Supabase GitHub integration, so run `npm run test:baza` before merging a
+migration. There is no lint step; `npm run check` fails on any warning.
 
 The local database has no Realtime service, so live updates are covered by reading the policies and by the RLS
 tests, not by a live run.

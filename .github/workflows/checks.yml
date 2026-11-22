@@ -1,0 +1,51 @@
+# Runs on every pull request and on main: the app's rules (Vitest), astro check and
+# svelte-check with no warnings, the static build, and the demo smoke test in headless
+# Chrome against that build. Nothing here needs Supabase or a secret: without
+# PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_KEY the build is the demo. The database tests
+# (`npm run test:baza`) and the two-account smoke test still run by hand
+# (docs/guides/development.md). The job `checks` is required on main by the branch ruleset.
+# Actions are pinned to commits (the tag is in the comment).
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install, exactly as locked
+        run: npm ci
+
+      - name: Test (Vitest)
+        run: npm test
+
+      - name: Check (astro check, svelte-check)
+        run: npm run check
+
+      - name: Build (the demo)
+        run: npm run build
+
+      # The runner image has google-chrome. The smoke test waits for fixed times between
+      # steps; preview serves the static build, so pages answer at once.
+      - name: Smoke test of the demo
+        run: |
+          npx astro preview --port 8040 --host 127.0.0.1 &
+          for i in $(seq 1 40); do curl -sf -o /dev/null http://127.0.0.1:8040/ && break; sleep 0.5; done
+          npm run smoke
